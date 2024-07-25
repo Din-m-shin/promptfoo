@@ -73,6 +73,7 @@ export const EnvOverridesSchema = z.object({
   MISTRAL_API_KEY: z.string().optional(),
   CLOUDFLARE_API_KEY: z.string().optional(),
   CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
+  SALTLUX_API_KEY: z.string().optional(),
 });
 
 export const ProviderOptionsSchema = z

@@ -52,7 +52,9 @@ import {
   ReplicateModerationProvider,
   ReplicateProvider,
 } from './providers/replicate';
+import { SaltluxChatCompletionProvider } from './providers/saltlux';
 import { ScriptCompletionProvider } from './providers/scriptCompletion';
+import { UpstageChatCompletionProvider } from './providers/upstage';
 import { VertexChatProvider, VertexEmbeddingProvider } from './providers/vertex';
 import { VoyageEmbeddingProvider } from './providers/voyage';
 import { WebhookProvider } from './providers/webhook';
@@ -351,6 +353,17 @@ export async function loadApiProvider(
     ret = new RedteamImageIterativeProvider();
   } else if (providerPath === 'promptfoo:manual-input') {
     ret = new ManualInputProvider(providerOptions);
+  } else if (providerPath.startsWith('upstage:')) {
+    const splits = providerPath.split(':');
+    const modelName = splits[1];
+
+    ret = new UpstageChatCompletionProvider(modelName, providerOptions);
+  } else if (providerPath.startsWith('saltlux:')) {
+    console.log('saltlux provider');
+    const splits = providerPath.split(':');
+    const modelName = splits[1] + ':' + splits[2]; // "luxiaon"과 "basic"을 연결
+
+    ret = new SaltluxChatCompletionProvider(modelName, providerOptions);
   } else {
     if (providerPath.startsWith('file://')) {
       providerPath = providerPath.slice('file://'.length);
