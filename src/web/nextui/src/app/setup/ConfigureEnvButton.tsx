@@ -141,6 +141,19 @@ const ConfigureEnvButton: React.FC = () => {
               />
             </AccordionDetails>
           </Accordion>
+          <Accordion>
+            <AccordionSummary>Saltlux</AccordionSummary>
+            <AccordionDetails>
+              <TextField
+                label="Saltlux API key"
+                fullWidth
+                margin="normal"
+                defaultValue="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc2NjI5ZjE2LWI2ZTktNGZjYi05YWFkLWE4MzA1NGY5YTEzMSJ9.pXrrad6HedTl5lNCRvMXTXOUje0Ak-_MoYgQp3PNdw4"
+                value={env.SALTLUX_API_KEY}
+                onChange={(e) => setEnv({ ...env, SALTLUX_API_KEY: e.target.value })}
+              />
+            </AccordionDetails>
+          </Accordion>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">

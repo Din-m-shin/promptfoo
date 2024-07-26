@@ -30,6 +30,7 @@ import {
   LocalAiEmbeddingProvider,
 } from './providers/localai';
 import { ManualInputProvider } from './providers/manualInput';
+import { MetaLlamaChatCompletionProvider } from './providers/meta';
 import { MistralChatCompletionProvider } from './providers/mistral';
 import {
   OllamaEmbeddingProvider,
@@ -371,6 +372,13 @@ export async function loadApiProvider(
     const modelName = splits[1] + ':' + splits[2]; // "luxiaon"과 "basic"을 연결
 
     ret = new SaltluxChatCompletionProvider(modelName, providerOptions);
+  } else if (providerPath.startsWith('meta:')) {
+    console.log('meta provider');
+    const splits = providerPath.split(':');
+    const modelName = splits[1];
+    console.log('meta modelName ', modelName);
+
+    ret = new MetaLlamaChatCompletionProvider(modelName, providerOptions);
   } else {
     if (providerPath.startsWith('file://')) {
       providerPath = providerPath.slice('file://'.length);
