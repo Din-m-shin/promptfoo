@@ -1,3 +1,7 @@
+---
+sidebar_position: 20
+---
+
 # OWASP LLM Top 10
 
 Promptfoo is an open-source tool that can help address many of the vulnerabilities outlined in the OWASP LLM Top 10. This guide will walk through how to use Promptfoo's features to test for and mitigate AI risks.
@@ -186,8 +190,8 @@ tests:
         value: file://verify_watermark.py
 ```
 
-## Conclusion
+## What's next
 
-The OWASP LLM Top 10 is rapidly evoling, but the above examples should give you a good starting point for testing your LLM applications. Regular testing with Promptfoo can help ensure your LLM applications remain secure and robust against a wide range of potential threats.
+The OWASP LLM Top 10 is rapidly evolving, but the above examples should give you a good starting point for testing your LLM applications. Regular testing with Promptfoo can help ensure your LLM applications remain secure and robust against a wide range of potential threats.
 
 To learn more about setting up Promptfoo and finding LLM vulnerabilities, see [Introduction to LLM red teaming](/docs/red-team/) and [Configuration details](/docs/red-team/configuration/).
