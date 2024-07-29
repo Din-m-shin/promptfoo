@@ -5,8 +5,8 @@ import { safeJsonStringify } from '../util/json';
 import { REQUEST_TIMEOUT_MS, parseChatPrompt } from './shared';
 
 
-const META_LLAMA_CHAT_MODELS = [
-  ...['Llama-3-1-8B-Instruct'].map((model) => ({
+const GEMMA_CHAT_MODELS = [
+  ...['gemma-2-9b-it-Q8_0'].map((model) => ({
     id: model,
     cost: {
       input: 5 / 1000000,
@@ -15,7 +15,7 @@ const META_LLAMA_CHAT_MODELS = [
   })),
 ];
 
-interface MetaLlamaAiSharedOptions {
+interface GemmaAiSharedOptions {
   apiKey?: string;
   apiKeyEnvar?: string;
   apiHost?: string;
@@ -25,16 +25,16 @@ interface MetaLlamaAiSharedOptions {
   headers?: { [key: string]: string };
 }
 
-type MetaLlamaCompletionOptions = MetaLlamaAiSharedOptions & {
+type GemmaCompletionOptions = GemmaAiSharedOptions & {
   temperature?: number;
   max_tokens?: number;
   top_p?: number;
   frequency_penalty?: number;
   presence_penalty?: number;
   best_of?: number;
-  //   functions?: MetaLlamaFunction[];
+  //   functions?: GemmaFunction[];
   function_call?: 'none' | 'auto' | { name: string };
-  //   tools?: MetaLlamaTool[];
+  //   tools?: GemmaTool[];
   tool_choice?: 'none' | 'auto' | 'required' | { type: 'function'; function?: { name: string } };
   response_format?: { type: 'json_object' };
   stop?: string[];
@@ -46,12 +46,12 @@ type MetaLlamaCompletionOptions = MetaLlamaAiSharedOptions & {
    * these function tools.
    */
   //   functionToolCallbacks?: Record<
-  //     MetaLlama.FunctionDefinition['name'],
+  //     Gemma.FunctionDefinition['name'],
   //     (arg: string) => Promise<string>
   //   >;
 };
 
-function formatMetaLlamaError(data: {
+function formatGemmaError(data: {
   error: { message: string; type?: string; code?: string };
 }): string {
   let errorMessage = `API error: ${data.error.message}`;
@@ -67,7 +67,7 @@ function formatMetaLlamaError(data: {
 
 function calculateCost(
   modelName: string,
-  config: MetaLlamaAiSharedOptions,
+  config: GemmaAiSharedOptions,
   promptTokens?: number,
   completionTokens?: number,
 ): number | undefined {
@@ -75,7 +75,7 @@ function calculateCost(
     return undefined;
   }
 
-  const model = [...META_LLAMA_CHAT_MODELS].find((m) => m.id === modelName);
+  const model = [...GEMMA_CHAT_MODELS].find((m) => m.id === modelName);
   if (!model || !model.cost) {
     return undefined;
   }
@@ -100,15 +100,15 @@ function getTokenUsage(data: any, cached: boolean): Partial<TokenUsage> {
   return {};
 }
 
-export class MetaLlamaGenericProvider implements ApiProvider {
+export class GemmaGenericProvider implements ApiProvider {
   modelName: string;
 
-  config: MetaLlamaAiSharedOptions;
+  config: GemmaAiSharedOptions;
   env?: EnvOverrides;
 
   constructor(
     modelName: string,
-    options: { config?: MetaLlamaAiSharedOptions; id?: string; env?: EnvOverrides } = {},
+    options: { config?: GemmaAiSharedOptions; id?: string; env?: EnvOverrides } = {},
   ) {
     const { config, id, env } = options;
     this.env = env;
@@ -120,39 +120,40 @@ export class MetaLlamaGenericProvider implements ApiProvider {
   id(): string {
     return this.config.apiHost || this.config.apiBaseUrl
       ? this.modelName
-      : `MetaLlama:${this.modelName}`;
+      : `Gemma:${this.modelName}`;
   }
 
   toString(): string {
-    return `[MetaLlama Provider ${this.modelName}]`;
+    return `[Gemma Provider ${this.modelName}]`;
   }
 
   getOrganization(): string | undefined {
     return (
       this.config.organization ||
-      //   || this.env?.META_LLAMA_ORGANIZATION
-      process.env.META_LLAMA_ORGANIZATION
+      //   || this.env?.GEMMA_ORGANIZATION
+      process.env.GEMMA_ORGANIZATION
     );
   }
 
   getApiUrlDefault(): string {
-    return 'http://192.168.17.95:1234/v1';
+    return 'http://192.168.17.153:41020/v1';
   }
 
   getApiUrl(): string {
+    logger.error(`GEMMA_BASE_URL: ${this.env?.GEMMA_BASE_URL}`);
     const apiHost =
-      this.config.apiHost 
-       || this.env?.META_LLAMA_API_HOST
-      || process.env.META_LLAMA_API_HOST;
+      this.config.apiHost
+      || this.env?.GEMMA_API_HOST
+      || process.env.GEMMA_API_HOST;
     if (apiHost) {
       return `https://${apiHost}/v1`;
     }
     return (
       this.config.apiBaseUrl ||
-         this.env?.META_LLAMA_API_BASE_URL ||
-         this.env?.META_LLAMA_BASE_URL ||
-      process.env.META_LLAMA_API_BASE_URL ||
-      process.env.META_LLAMA_BASE_URL ||
+         this.env?.GEMMA_API_BASE_URL ||
+         this.env?.GEMMA_BASE_URL ||
+      process.env.GEMMA_API_BASE_URL ||
+      process.env.GEMMA_BASE_URL ||
       this.getApiUrlDefault()
     );
   }
@@ -164,8 +165,8 @@ export class MetaLlamaGenericProvider implements ApiProvider {
         ? process.env[this.config.apiKeyEnvar] ||
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
-      //   this.env?.META_LLAMA_API_KEY ||
-      process.env.META_LLAMA_API_KEY
+      //   this.env?.GEMMA_API_KEY ||
+      process.env.GEMMA_API_KEY
     );
   }
 
@@ -179,19 +180,19 @@ export class MetaLlamaGenericProvider implements ApiProvider {
   }
 }
 
-export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
-  static META_LLAMA_CHAT_MODELS = META_LLAMA_CHAT_MODELS;
+export class GemmaChatCompletionProvider extends GemmaGenericProvider {
+  static GEMMA_CHAT_MODELS = GEMMA_CHAT_MODELS;
 
-  static META_LLAMA_CHAT_MODEL_NAMES = META_LLAMA_CHAT_MODELS.map((model) => model.id);
+  static GEMMA_CHAT_MODEL_NAMES = GEMMA_CHAT_MODELS.map((model) => model.id);
 
-  config: MetaLlamaCompletionOptions;
+  config: GemmaCompletionOptions;
 
   constructor(
     modelName: string,
-    options: { config?: MetaLlamaCompletionOptions; id?: string; env?: EnvOverrides } = {},
+    options: { config?: GemmaCompletionOptions; id?: string; env?: EnvOverrides } = {},
   ) {
-    if (!MetaLlamaChatCompletionProvider.META_LLAMA_CHAT_MODEL_NAMES.includes(modelName)) {
-      logger.debug(`Using unknown MetaLlama chat model: ${modelName}`);
+    if (!GemmaChatCompletionProvider.GEMMA_CHAT_MODEL_NAMES.includes(modelName)) {
+      logger.debug(`Using unknown Gemma chat model: ${modelName}`);
     }
     super(modelName, options);
     this.config = options.config || {};
@@ -205,7 +206,7 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
     // not use api key
     // if (!this.getApiKey()) {
     //   throw new Error(
-    //     'MetaLlama API key is not set. Set the MetaLlama_API_KEY environment variable or add `apiKey` to the provider config.',
+    //     'Gemma API key is not set. Set the API_KEY environment variable or add `apiKey` to the provider config.',
     //   );
     // }
 
@@ -215,13 +216,14 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
       model: this.modelName,
       messages: messages,
       seed: this.config.seed || 0,
-      max_tokens: this.config.max_tokens ?? parseInt(process.env.META_LLAMA_MAX_TOKENS || '1024'),
-      temperature: this.config.temperature ?? parseFloat(process.env.META_LLAMA_TEMPERATURE || '0'),
-      top_p: this.config.top_p ?? parseFloat(process.env.META_LLAMA_TOP_P || '1'),
+      max_tokens: this.config.max_tokens ?? parseInt(process.env.GEMMA_MAX_TOKENS || '1024'),
+      temperature: this.config.temperature ?? parseFloat(process.env.GEMMA_TEMPERATURE || '0'),
+      top_p: this.config.top_p ?? parseFloat(process.env.GEMMA_TOP_P || '1'),
       presence_penalty:
-        this.config.presence_penalty ?? parseFloat(process.env.META_LLAMA_PRESENCE_PENALTY || '0'),
+        this.config.presence_penalty ?? parseFloat(process.env.GEMMA_PRESENCE_PENALTY || '0'),
       frequency_penalty:
-        this.config.frequency_penalty ?? parseFloat(process.env.META_LLAMA_FREQUENCY_PENALTY || '0'),
+        this.config.frequency_penalty ??
+        parseFloat(process.env.GEMMA_FREQUENCY_PENALTY || '0'),
       //   ...(this.config.functions
       //     ? { functions: renderVarsInObject(this.config.functions, context?.vars) }
       //     : {}),
@@ -233,7 +235,7 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
       ...(this.config.stop ? { stop: this.config.stop } : {}),
       ...(this.config.passthrough || {}),
     };
-    logger.debug(`Calling MetaLlama API: ${JSON.stringify(body)}`);
+    logger.debug(`Calling Gemma API: ${JSON.stringify(body)}`);
 
     let data,
       cached = false;
@@ -245,7 +247,7 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${this.getApiKey()}`,
-            ...(this.getOrganization() ? { 'MetaLlama-Organization': this.getOrganization() } : {}),
+            ...(this.getOrganization() ? { 'Gemma-Organization': this.getOrganization() } : {}),
             ...this.config.headers,
           },
           body: JSON.stringify(body),
@@ -258,10 +260,10 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
       };
     }
 
-    logger.debug(`\tMetaLlama chat completions API response: ${JSON.stringify(data)}`);
+    logger.debug(`\tGemma chat completions API response: ${JSON.stringify(data)}`);
     if (data.error) {
       return {
-        error: formatMetaLlamaError(data),
+        error: formatGemmaError(data),
       };
     }
     try {

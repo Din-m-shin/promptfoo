@@ -15,6 +15,7 @@ import { BAMChatProvider, BAMEmbeddingProvider } from './providers/bam';
 import { AwsBedrockCompletionProvider, AwsBedrockEmbeddingProvider } from './providers/bedrock';
 import * as CloudflareAiProviders from './providers/cloudflare-ai';
 import { CohereChatCompletionProvider } from './providers/cohere';
+import { GemmaChatCompletionProvider } from './providers/gemma';
 import { HttpProvider } from './providers/http';
 import {
   HuggingfaceFeatureExtractionProvider,
@@ -362,6 +363,7 @@ export async function loadApiProvider(
   } else if (providerPath === 'promptfoo:manual-input') {
     ret = new ManualInputProvider(providerOptions);
   } else if (providerPath.startsWith('upstage:')) {
+    console.log('upstage provider');
     const splits = providerPath.split(':');
     const modelName = splits[1];
 
@@ -379,6 +381,13 @@ export async function loadApiProvider(
     console.log('meta modelName ', modelName);
 
     ret = new MetaLlamaChatCompletionProvider(modelName, providerOptions);
+  } else if (providerPath.startsWith('gemma:')) {
+    console.log('gemma provider');
+    const splits = providerPath.split(':');
+    const modelName = splits[1];
+    console.log('gemma modelName ', modelName);
+
+    ret = new GemmaChatCompletionProvider(modelName, providerOptions);
   } else {
     if (providerPath.startsWith('file://')) {
       providerPath = providerPath.slice('file://'.length);
