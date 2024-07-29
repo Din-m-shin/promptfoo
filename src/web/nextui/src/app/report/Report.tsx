@@ -55,7 +55,11 @@ const App: React.FC = () => {
 
       const categoriesToCount = [harm, ...metricNames].filter((c) => c);
       for (const category of categoriesToCount) {
-        const pluginName = categoryAliasesReverse[category as keyof typeof categoryAliases];
+        if (typeof category !== 'string') {
+          continue;
+        }
+        const pluginName =
+          categoryAliasesReverse[category.split('/')[0] as keyof typeof categoryAliases];
         if (!pluginName) {
           console.log('Unknown harm category:', category);
           return acc;
@@ -68,7 +72,9 @@ const App: React.FC = () => {
           return isModeration && isPass;
         });
         const rowPassedLlmRubric = row.gradingResult?.componentResults?.some((result) => {
-          const isLlmRubric = result.assertion?.type === 'llm-rubric';
+          const isLlmRubric =
+            result.assertion?.type === 'llm-rubric' ||
+            result.assertion?.type.startsWith('promptfoo:redteam');
           const isPass = result.pass;
           return isLlmRubric && isPass;
         });
