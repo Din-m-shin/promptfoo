@@ -204,6 +204,20 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
       },
     })),
   )
+  .concat(
+    ['gemma:gemma-2-9b-it-Q8'].map((id) => ({
+      id,
+      config: {
+        temperature: 0.7,
+        top_p: 0.9,
+        top_k: -1,
+        max_new_tokens: 128,
+        min_new_tokens: -1,
+        repetition_penalty: 1.15,
+        prompt_template: '{prompt}',
+      },
+    })),
+  )
   .sort((a, b) => a.id.localeCompare(b.id));
 
 const PREFIX_TO_PROVIDER: Record<string, string> = {

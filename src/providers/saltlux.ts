@@ -141,16 +141,14 @@ export class SaltluxGenericProvider implements ApiProvider {
 
   getApiUrl(): string {
     const apiHost =
-      this.config.apiHost ||
-      //   || this.env?.SALTLUX_API_HOST
-      process.env.SALTLUX_API_HOST;
+      this.config.apiHost || this.env?.SALTLUX_API_HOST || process.env.SALTLUX_API_HOST;
     if (apiHost) {
       return `https://${apiHost}/v1`;
     }
     return (
       this.config.apiBaseUrl ||
-      //   this.env?.SALTLUX_API_BASE_URL ||
-      //   this.env?.SALTLUX_BASE_URL ||
+         this.env?.SALTLUX_API_BASE_URL ||
+         this.env?.SALTLUX_BASE_URL ||
       process.env.SALTLUX_API_BASE_URL ||
       process.env.SALTLUX_BASE_URL ||
       this.getApiUrlDefault()

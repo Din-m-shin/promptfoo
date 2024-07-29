@@ -74,6 +74,18 @@ export const EnvOverridesSchema = z.object({
   CLOUDFLARE_API_KEY: z.string().optional(),
   CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
   SALTLUX_API_KEY: z.string().optional(),
+  UPSTAGE_API_HOST: z.string().optional(),
+  UPSTAGE_API_BASE_URL: z.string().optional(),
+  UPSTAGE_BASE_URL: z.string().optional(),
+  SALTLUX_API_HOST: z.string().optional(),
+  SALTLUX_API_BASE_URL: z.string().optional(),
+  SALTLUX_BASE_URL: z.string().optional(),
+  META_LLAMA_API_HOST: z.string().optional(),
+  META_LLAMA_API_BASE_URL: z.string().optional(),
+  META_LLAMA_BASE_URL: z.string().optional(),
+  GEMMA_API_HOST: z.string().optional(),
+  GEMMA_API_BASE_URL: z.string().optional(),
+  GEMMA_BASE_URL: z.string().optional(),
 });
 
 export const ProviderOptionsSchema = z

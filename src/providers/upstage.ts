@@ -1,5 +1,4 @@
-
-import { fetchWithCache} from '../cache';
+import { fetchWithCache } from '../cache';
 import logger from '../logger';
 import type { ApiProvider, CallApiContextParams, CallApiOptionsParams, EnvOverrides, ProviderResponse, TokenUsage } from '../types';
 import { safeJsonStringify } from '../util/json';
@@ -145,17 +144,17 @@ export class UpstageGenericProvider implements ApiProvider {
   getApiUrl(): string {
     const apiHost =
       this.config.apiHost 
-    //   || this.env?.UPSTAGE_API_HOST 
+       || this.env?.UPSTAGE_API_HOST 
       || process.env.UPSTAGE_API_HOST;
     if (apiHost) {
       return `https://${apiHost}/v1`;
     }
     return (
       this.config.apiBaseUrl ||
-    //   this.env?.UPSTAGE_API_BASE_URL ||
-    //   this.env?.UPSTAGE_BASE_URL ||
-      process.env.Upstage_API_BASE_URL ||
-      process.env.Upstage_BASE_URL ||
+       this.env?.UPSTAGE_API_BASE_URL ||
+       this.env?.UPSTAGE_BASE_URL ||
+      process.env.UPSTAGE_API_BASE_URL ||
+      process.env.UPSTAGE_BASE_URL ||
       this.getApiUrlDefault()
     );
   }
@@ -168,7 +167,7 @@ export class UpstageGenericProvider implements ApiProvider {
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
     //   this.env?.Upstage_API_KEY ||
-      process.env.Upstage_API_KEY
+      process.env.UPSTAGE_API_KEY
     );
   }
 

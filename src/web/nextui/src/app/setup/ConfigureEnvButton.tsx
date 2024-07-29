@@ -142,6 +142,18 @@ const ConfigureEnvButton: React.FC = () => {
             </AccordionDetails>
           </Accordion>
           <Accordion>
+            <AccordionSummary>Upstage</AccordionSummary>
+            <AccordionDetails>
+              <TextField
+                label="Upstage Base Url"
+                fullWidth
+                margin="normal"
+                value={env.UPSTAGE_BASE_URL}
+                onChange={(e) => setEnv({ ...env, UPSTAGE_BASE_URL: e.target.value })}
+              />
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
             <AccordionSummary>Saltlux</AccordionSummary>
             <AccordionDetails>
               <TextField
@@ -151,6 +163,37 @@ const ConfigureEnvButton: React.FC = () => {
                 defaultValue="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc2NjI5ZjE2LWI2ZTktNGZjYi05YWFkLWE4MzA1NGY5YTEzMSJ9.pXrrad6HedTl5lNCRvMXTXOUje0Ak-_MoYgQp3PNdw4"
                 value={env.SALTLUX_API_KEY}
                 onChange={(e) => setEnv({ ...env, SALTLUX_API_KEY: e.target.value })}
+              />
+              <TextField
+                label="Saltlux Base Url"
+                fullWidth
+                margin="normal"
+                value={env.SALTLUX_BASE_URL}
+                onChange={(e) => setEnv({ ...env, SALTLUX_BASE_URL: e.target.value })}
+              />
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary>Meta</AccordionSummary>
+            <AccordionDetails>
+              <TextField
+                label="Meta Base Url"
+                fullWidth
+                margin="normal"
+                value={env.META_LLAMA_BASE_URL}
+                onChange={(e) => setEnv({ ...env, META_LLAMA_BASE_URL: e.target.value })}
+              />
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary>Gemma</AccordionSummary>
+            <AccordionDetails>
+              <TextField
+                label="Gemma Base Url"
+                fullWidth
+                margin="normal"
+                value={env.GEMMA_BASE_URL}
+                onChange={(e) => setEnv({ ...env, GEMMA_BASE_URL: e.target.value })}
               />
             </AccordionDetails>
           </Accordion>
