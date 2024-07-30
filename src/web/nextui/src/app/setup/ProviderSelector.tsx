@@ -172,7 +172,6 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         max_new_tokens: 128,
         min_new_tokens: -1,
         repetition_penalty: 1.15,
-        prompt_template: '{prompt}',
       },
     })),
   )
@@ -186,7 +185,6 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         max_new_tokens: 128,
         min_new_tokens: -1,
         repetition_penalty: 1.15,
-        prompt_template: '{prompt}',
       },
     })),
   )
@@ -200,7 +198,6 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         max_new_tokens: 128,
         min_new_tokens: -1,
         repetition_penalty: 1.15,
-        prompt_template: '{prompt}',
       },
     })),
   )
@@ -208,13 +205,12 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
     ['gemma:gemma-2-9b-it-Q8'].map((id) => ({
       id,
       config: {
-        temperature: 0.7,
-        top_p: 0.9,
-        top_k: -1,
-        max_new_tokens: 128,
+        temperature: 1,
+        top_p: 0.95,
+        top_k: 40,
+        max_new_tokens: 1000,
         min_new_tokens: -1,
         repetition_penalty: 1.15,
-        prompt_template: '{prompt}',
       },
     })),
   )
