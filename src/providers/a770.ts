@@ -5,17 +5,91 @@ import { safeJsonStringify } from '../util/json';
 import { REQUEST_TIMEOUT_MS, parseChatPrompt } from './shared';
 
 
-const GEMMA_CHAT_MODELS = [
-  ...['gemma-2-9b-it-Q8_0'].map((model) => ({
-    id: model,
+interface ChatModel {
+  id: string;
+  cost: {
+    input: number;
+    output: number;
+  };
+}
+
+class ChatModelConfig {
+  private models: ChatModel[] = [];
+
+  constructor(initialModels?: ChatModel[]) {
+    if (initialModels) {
+      this.models.push(...initialModels);
+    }
+  }
+
+  addModelFromEnv(env: EnvOverrides): void {
+    const modelId = env?.A770_MODEL_NAME || process.env.A770_MODEL_NAME;
+    if (!modelId) {
+      console.error('Environment variable A770_MODEL_NAME is not set.');
+      return;
+    }
+
+    const existingModel = this.models.find((m) => m.id === modelId);
+    if (existingModel) {
+      console.error(`Model ID ${modelId} already exists.`);
+      return;
+    }
+
+    // 예시로 비용 값을 하드 코딩함, 실제로는 환경 변수나 다른 설정에서 가져올 수 있음
+    this.models.push({
+      id: modelId,
+      cost: {
+        input: 5 / 1000000,
+        output: 15 / 1000000,
+      },
+    });
+    console.log(`Model ${modelId} added successfully.`);
+  }
+
+  updateModelCost(modelId: string, inputCost?: number, outputCost?: number): void {
+    const model = this.models.find((m) => m.id === modelId);
+    if (model) {
+      if (inputCost !== undefined) {
+        model.cost.input = inputCost;
+      }
+      if (outputCost !== undefined) {
+        model.cost.output = outputCost;
+      }
+    } else {
+      console.error(`Model ID ${modelId} not found.`);
+    }
+  }
+
+  getModels(): ChatModel[] {
+    return this.models;
+  }
+}
+
+const initialModels: ChatModel[] = [
+  {
+    id: '2-9b-it-Q8_0',
     cost: {
       input: 5 / 1000000,
       output: 15 / 1000000,
     },
-  })),
+  },
 ];
 
-interface GemmaAiSharedOptions {
+const chatModelsConfig = new ChatModelConfig(initialModels);
+
+const A770_CHAT_MODELS = chatModelsConfig.getModels();
+
+// const A770_CHAT_MODELS = [
+//   ...['2-9b-it-Q8_0'].map((model) => ({
+//     id: model,
+//     cost: {
+//       input: 5 / 1000000,
+//       output: 15 / 1000000,
+//     },
+//   })),
+// ];
+
+interface A770AiSharedOptions {
   apiKey?: string;
   apiKeyEnvar?: string;
   apiHost?: string;
@@ -25,16 +99,16 @@ interface GemmaAiSharedOptions {
   headers?: { [key: string]: string };
 }
 
-type GemmaCompletionOptions = GemmaAiSharedOptions & {
+type A770CompletionOptions = A770AiSharedOptions & {
   temperature?: number;
   max_tokens?: number;
   top_p?: number;
   frequency_penalty?: number;
   presence_penalty?: number;
   best_of?: number;
-  //   functions?: GemmaFunction[];
+  //   functions?: A770Function[];
   function_call?: 'none' | 'auto' | { name: string };
-  //   tools?: GemmaTool[];
+  //   tools?: A770Tool[];
   tool_choice?: 'none' | 'auto' | 'required' | { type: 'function'; function?: { name: string } };
   response_format?: { type: 'json_object' };
   stop?: string[];
@@ -46,12 +120,12 @@ type GemmaCompletionOptions = GemmaAiSharedOptions & {
    * these function tools.
    */
   //   functionToolCallbacks?: Record<
-  //     Gemma.FunctionDefinition['name'],
+  //     A770.FunctionDefinition['name'],
   //     (arg: string) => Promise<string>
   //   >;
 };
 
-function formatGemmaError(data: {
+function formatA770Error(data: {
   error: { message: string; type?: string; code?: string };
 }): string {
   let errorMessage = `API error: ${data.error.message}`;
@@ -67,7 +141,7 @@ function formatGemmaError(data: {
 
 function calculateCost(
   modelName: string,
-  config: GemmaAiSharedOptions,
+  config: A770AiSharedOptions,
   promptTokens?: number,
   completionTokens?: number,
 ): number | undefined {
@@ -75,7 +149,7 @@ function calculateCost(
     return undefined;
   }
 
-  const model = [...GEMMA_CHAT_MODELS].find((m) => m.id === modelName);
+  const model = [...A770_CHAT_MODELS].find((m) => m.id === modelName);
   if (!model || !model.cost) {
     return undefined;
   }
@@ -100,15 +174,15 @@ function getTokenUsage(data: any, cached: boolean): Partial<TokenUsage> {
   return {};
 }
 
-export class GemmaGenericProvider implements ApiProvider {
+export class A770GenericProvider implements ApiProvider {
   modelName: string;
 
-  config: GemmaAiSharedOptions;
+  config: A770AiSharedOptions;
   env?: EnvOverrides;
 
   constructor(
     modelName: string,
-    options: { config?: GemmaAiSharedOptions; id?: string; env?: EnvOverrides } = {},
+    options: { config?: A770AiSharedOptions; id?: string; env?: EnvOverrides } = {},
   ) {
     const { config, id, env } = options;
     this.env = env;
@@ -120,18 +194,18 @@ export class GemmaGenericProvider implements ApiProvider {
   id(): string {
     return this.config.apiHost || this.config.apiBaseUrl
       ? this.modelName
-      : `Gemma:${this.modelName}`;
+      : `A770:${this.modelName}`;
   }
 
   toString(): string {
-    return `[Gemma Provider ${this.modelName}]`;
+    return `[A770 Provider ${this.modelName}]`;
   }
 
   getOrganization(): string | undefined {
     return (
       this.config.organization ||
-      //   || this.env?.GEMMA_ORGANIZATION
-      process.env.GEMMA_ORGANIZATION
+      //   || this.env?.A770_ORGANIZATION
+      process.env.A770_ORGANIZATION
     );
   }
 
@@ -140,21 +214,28 @@ export class GemmaGenericProvider implements ApiProvider {
   }
 
   getApiUrl(): string {
-    logger.error(`GEMMA_BASE_URL: ${this.env?.GEMMA_BASE_URL}`);
+    logger.error(`A770_BASE_URL: ${this.env?.A770_BASE_URL}`);
     const apiHost =
       this.config.apiHost
-      || this.env?.GEMMA_API_HOST
-      || process.env.GEMMA_API_HOST;
+      || this.env?.A770_API_HOST
+      || process.env.A770_API_HOST;
     if (apiHost) {
       return `https://${apiHost}/v1`;
     }
     return (
       this.config.apiBaseUrl ||
-         this.env?.GEMMA_API_BASE_URL ||
-         this.env?.GEMMA_BASE_URL ||
-      process.env.GEMMA_API_BASE_URL ||
-      process.env.GEMMA_BASE_URL ||
+         this.env?.A770_API_BASE_URL ||
+         this.env?.A770_BASE_URL ||
+      process.env.A770_API_BASE_URL ||
+      process.env.A770_BASE_URL ||
       this.getApiUrlDefault()
+    );
+  }
+
+  getModelName(): string | undefined {
+    return (
+         this.env?.A770_MODEL_NAME ||
+      process.env.A770_MODEL_NAME
     );
   }
 
@@ -165,8 +246,8 @@ export class GemmaGenericProvider implements ApiProvider {
         ? process.env[this.config.apiKeyEnvar] ||
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
-      //   this.env?.GEMMA_API_KEY ||
-      process.env.GEMMA_API_KEY
+      //   this.env?.A770_API_KEY ||
+      process.env.A770_API_KEY
     );
   }
 
@@ -180,19 +261,19 @@ export class GemmaGenericProvider implements ApiProvider {
   }
 }
 
-export class GemmaChatCompletionProvider extends GemmaGenericProvider {
-  static GEMMA_CHAT_MODELS = GEMMA_CHAT_MODELS;
+export class A770ChatCompletionProvider extends A770GenericProvider {
+  static A770_CHAT_MODELS = A770_CHAT_MODELS;
 
-  static GEMMA_CHAT_MODEL_NAMES = GEMMA_CHAT_MODELS.map((model) => model.id);
+  static A770_CHAT_MODEL_NAMES = A770_CHAT_MODELS.map((model) => model.id);
 
-  config: GemmaCompletionOptions;
+  config: A770CompletionOptions;
 
   constructor(
     modelName: string,
-    options: { config?: GemmaCompletionOptions; id?: string; env?: EnvOverrides } = {},
+    options: { config?: A770CompletionOptions; id?: string; env?: EnvOverrides } = {},
   ) {
-    if (!GemmaChatCompletionProvider.GEMMA_CHAT_MODEL_NAMES.includes(modelName)) {
-      logger.debug(`Using unknown Gemma chat model: ${modelName}`);
+    if (!A770ChatCompletionProvider.A770_CHAT_MODEL_NAMES.includes(modelName)) {
+      logger.debug(`Using unknown A770 chat model: ${modelName}`);
     }
     super(modelName, options);
     this.config = options.config || {};
@@ -206,7 +287,7 @@ export class GemmaChatCompletionProvider extends GemmaGenericProvider {
     // not use api key
     // if (!this.getApiKey()) {
     //   throw new Error(
-    //     'Gemma API key is not set. Set the API_KEY environment variable or add `apiKey` to the provider config.',
+    //     'A770 API key is not set. Set the API_KEY environment variable or add `apiKey` to the provider config.',
     //   );
     // }
 
@@ -216,14 +297,14 @@ export class GemmaChatCompletionProvider extends GemmaGenericProvider {
       model: this.modelName,
       messages: messages,
       seed: this.config.seed || 0,
-      max_tokens: this.config.max_tokens ?? parseInt(process.env.GEMMA_MAX_TOKENS || '1024'),
-      temperature: this.config.temperature ?? parseFloat(process.env.GEMMA_TEMPERATURE || '0'),
-      top_p: this.config.top_p ?? parseFloat(process.env.GEMMA_TOP_P || '1'),
+      max_tokens: this.config.max_tokens ?? parseInt(process.env.A770_MAX_TOKENS || '1024'),
+      temperature: this.config.temperature ?? parseFloat(process.env.A770_TEMPERATURE || '0'),
+      top_p: this.config.top_p ?? parseFloat(process.env.A770_TOP_P || '1'),
       presence_penalty:
-        this.config.presence_penalty ?? parseFloat(process.env.GEMMA_PRESENCE_PENALTY || '0'),
+        this.config.presence_penalty ?? parseFloat(process.env.A770_PRESENCE_PENALTY || '0'),
       frequency_penalty:
         this.config.frequency_penalty ??
-        parseFloat(process.env.GEMMA_FREQUENCY_PENALTY || '0'),
+        parseFloat(process.env.A770_FREQUENCY_PENALTY || '0'),
       //   ...(this.config.functions
       //     ? { functions: renderVarsInObject(this.config.functions, context?.vars) }
       //     : {}),
@@ -235,7 +316,7 @@ export class GemmaChatCompletionProvider extends GemmaGenericProvider {
       ...(this.config.stop ? { stop: this.config.stop } : {}),
       ...(this.config.passthrough || {}),
     };
-    logger.debug(`Calling Gemma API: ${JSON.stringify(body)}`);
+    logger.debug(`Calling A770 API: ${JSON.stringify(body)}`);
 
     let data,
       cached = false;
@@ -247,7 +328,7 @@ export class GemmaChatCompletionProvider extends GemmaGenericProvider {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${this.getApiKey()}`,
-            ...(this.getOrganization() ? { 'Gemma-Organization': this.getOrganization() } : {}),
+            ...(this.getOrganization() ? { 'A770-Organization': this.getOrganization() } : {}),
             ...this.config.headers,
           },
           body: JSON.stringify(body),
@@ -260,10 +341,10 @@ export class GemmaChatCompletionProvider extends GemmaGenericProvider {
       };
     }
 
-    logger.debug(`\tGemma chat completions API response: ${JSON.stringify(data)}`);
+    logger.debug(`\tA770 chat completions API response: ${JSON.stringify(data)}`);
     if (data.error) {
       return {
-        error: formatGemmaError(data),
+        error: formatA770Error(data),
       };
     }
     try {

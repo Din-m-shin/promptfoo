@@ -4,6 +4,8 @@ import path from 'path';
 import invariant from 'tiny-invariant';
 import { importModule } from './esm';
 import logger from './logger';
+import { A770ChatCompletionProvider } from './providers/a770';
+import { A6000ChatCompletionProvider } from './providers/a6000';
 import { AnthropicCompletionProvider, AnthropicMessagesProvider } from './providers/anthropic';
 import {
   AzureOpenAiAssistantProvider,
@@ -15,7 +17,6 @@ import { BAMChatProvider, BAMEmbeddingProvider } from './providers/bam';
 import { AwsBedrockCompletionProvider, AwsBedrockEmbeddingProvider } from './providers/bedrock';
 import * as CloudflareAiProviders from './providers/cloudflare-ai';
 import { CohereChatCompletionProvider } from './providers/cohere';
-import { GemmaChatCompletionProvider } from './providers/gemma';
 import { HttpProvider } from './providers/http';
 import {
   HuggingfaceFeatureExtractionProvider,
@@ -31,7 +32,6 @@ import {
   LocalAiEmbeddingProvider,
 } from './providers/localai';
 import { ManualInputProvider } from './providers/manualInput';
-import { MetaLlamaChatCompletionProvider } from './providers/meta';
 import { MistralChatCompletionProvider } from './providers/mistral';
 import {
   OllamaEmbeddingProvider,
@@ -374,20 +374,21 @@ export async function loadApiProvider(
     const modelName = splits[1] + ':' + splits[2]; // "luxiaon"과 "basic"을 연결
 
     ret = new SaltluxChatCompletionProvider(modelName, providerOptions);
-  } else if (providerPath.startsWith('meta:')) {
-    console.log('meta provider');
+  } else if (providerPath.startsWith('a6000:')) {
+    console.log('a6000 provider');
     const splits = providerPath.split(':');
-    const modelName = splits[1];
-    console.log('meta modelName ', modelName);
+    const modelName = env?.A770_MODEL_NAME || process.env.A770_MODEL_NAME || 'a6000 Model Name';
+    console.log('a6000 modelName ', modelName);
 
-    ret = new MetaLlamaChatCompletionProvider(modelName, providerOptions);
-  } else if (providerPath.startsWith('gemma:')) {
-    console.log('gemma provider');
+    ret = new A6000ChatCompletionProvider(modelName, providerOptions);
+  } else if (providerPath.startsWith('a770:')) {
+    console.log('a770 provider');
     const splits = providerPath.split(':');
-    const modelName = splits[1];
-    console.log('gemma modelName ', modelName);
+    // const modelName = splits[1];
+    const modelName = env?.A770_MODEL_NAME || process.env.A770_MODEL_NAME || 'a770 Model Name';
+    console.log('a770 modelName ', modelName);
 
-    ret = new GemmaChatCompletionProvider(modelName, providerOptions);
+    ret = new A770ChatCompletionProvider(modelName, providerOptions);
   } else {
     if (providerPath.startsWith('file://')) {
       providerPath = providerPath.slice('file://'.length);

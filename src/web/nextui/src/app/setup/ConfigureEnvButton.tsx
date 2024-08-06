@@ -174,26 +174,48 @@ const ConfigureEnvButton: React.FC = () => {
             </AccordionDetails>
           </Accordion>
           <Accordion>
-            <AccordionSummary>Meta</AccordionSummary>
+            <AccordionSummary>A6000</AccordionSummary>
             <AccordionDetails>
               <TextField
-                label="Meta Base Url"
+                label="A6000 Base Url"
                 fullWidth
                 margin="normal"
-                value={env.META_LLAMA_BASE_URL}
-                onChange={(e) => setEnv({ ...env, META_LLAMA_BASE_URL: e.target.value })}
+                defaultValue="http://192.168.17.95:1234/v1"
+                value={env.A6000_BASE_URL}
+                onChange={(e) => setEnv({ ...env, A6000_BASE_URL: e.target.value })}
+              />
+              <TextField
+                label="A6000 Model Name"
+                fullWidth
+                margin="normal"
+                value={env.A6000_MODEL_NAME}
+                onChange={(e) => {
+                  setEnv({ ...env, A6000_MODEL_NAME: e.target.value });
+                  process.env.A6000_MODEL_NAME = e.target.value;
+                }}
               />
             </AccordionDetails>
           </Accordion>
           <Accordion>
-            <AccordionSummary>Gemma</AccordionSummary>
+            <AccordionSummary>A770</AccordionSummary>
             <AccordionDetails>
               <TextField
-                label="Gemma Base Url"
+                label="A770 Base Url"
                 fullWidth
                 margin="normal"
-                value={env.GEMMA_BASE_URL}
-                onChange={(e) => setEnv({ ...env, GEMMA_BASE_URL: e.target.value })}
+                defaultValue="http://192.168.17.153:41020/v1"
+                value={env.A770_BASE_URL}
+                onChange={(e) => setEnv({ ...env, A770_BASE_URL: e.target.value })}
+              />
+              <TextField
+                label="A770 Model Name"
+                fullWidth
+                margin="normal"
+                value={env.A770_MODEL_NAME}
+                onChange={(e) => {
+                  setEnv({ ...env, A770_MODEL_NAME: e.target.value });
+                  process.env.A770_MODEL_NAME = e.target.value;
+                }}
               />
             </AccordionDetails>
           </Accordion>

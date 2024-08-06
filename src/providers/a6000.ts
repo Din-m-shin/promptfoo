@@ -5,17 +5,91 @@ import { safeJsonStringify } from '../util/json';
 import { REQUEST_TIMEOUT_MS, parseChatPrompt } from './shared';
 
 
-const META_LLAMA_CHAT_MODELS = [
-  ...['Llama-3-1-8B-Instruct'].map((model) => ({
-    id: model,
+interface ChatModel {
+  id: string;
+  cost: {
+    input: number;
+    output: number;
+  };
+}
+
+class ChatModelConfig {
+  private models: ChatModel[] = [];
+
+  constructor(initialModels?: ChatModel[]) {
+    if (initialModels) {
+      this.models.push(...initialModels);
+    }
+  }
+
+  addModelFromEnv(env: EnvOverrides): void {
+    const modelId = env?.A770_MODEL_NAME || process.env.A770_MODEL_NAME;
+    if (!modelId) {
+      console.error('Environment variable A770_MODEL_NAME is not set.');
+      return;
+    }
+
+    const existingModel = this.models.find((m) => m.id === modelId);
+    if (existingModel) {
+      console.error(`Model ID ${modelId} already exists.`);
+      return;
+    }
+
+    // 예시로 비용 값을 하드 코딩함, 실제로는 환경 변수나 다른 설정에서 가져올 수 있음
+    this.models.push({
+      id: modelId,
+      cost: {
+        input: 5 / 1000000,
+        output: 15 / 1000000,
+      },
+    });
+    console.log(`Model ${modelId} added successfully.`);
+  }
+
+  updateModelCost(modelId: string, inputCost?: number, outputCost?: number): void {
+    const model = this.models.find((m) => m.id === modelId);
+    if (model) {
+      if (inputCost !== undefined) {
+        model.cost.input = inputCost;
+      }
+      if (outputCost !== undefined) {
+        model.cost.output = outputCost;
+      }
+    } else {
+      console.error(`Model ID ${modelId} not found.`);
+    }
+  }
+
+  getModels(): ChatModel[] {
+    return this.models;
+  }
+}
+
+const initialModels: ChatModel[] = [
+  {
+    id: '2-9b-it-Q8_0',
     cost: {
       input: 5 / 1000000,
       output: 15 / 1000000,
     },
-  })),
+  },
 ];
 
-interface MetaLlamaAiSharedOptions {
+const chatModelsConfig = new ChatModelConfig(initialModels);
+
+const A6000_CHAT_MODELS = chatModelsConfig.getModels();
+
+// const META_LLAMA_CHAT_MODELS = [
+//   ...['3-1-8B-Instruct'].map((model) => ({
+//     id: model,
+//     cost: {
+//       input: 5 / 1000000,
+//       output: 15 / 1000000,
+//     },
+//   })),
+// ];
+
+interface A6000AiSharedOptions {
   apiKey?: string;
   apiKeyEnvar?: string;
   apiHost?: string;
@@ -25,16 +99,16 @@ interface MetaLlamaAiSharedOptions {
   headers?: { [key: string]: string };
 }
 
-type MetaLlamaCompletionOptions = MetaLlamaAiSharedOptions & {
+type A6000CompletionOptions = A6000AiSharedOptions & {
   temperature?: number;
   max_tokens?: number;
   top_p?: number;
   frequency_penalty?: number;
   presence_penalty?: number;
   best_of?: number;
-  //   functions?: MetaLlamaFunction[];
+  //   functions?: A6000Function[];
   function_call?: 'none' | 'auto' | { name: string };
-  //   tools?: MetaLlamaTool[];
+  //   tools?: A6000Tool[];
   tool_choice?: 'none' | 'auto' | 'required' | { type: 'function'; function?: { name: string } };
   response_format?: { type: 'json_object' };
   stop?: string[];
@@ -46,12 +120,12 @@ type MetaLlamaCompletionOptions = MetaLlamaAiSharedOptions & {
    * these function tools.
    */
   //   functionToolCallbacks?: Record<
-  //     MetaLlama.FunctionDefinition['name'],
+  //     A6000.FunctionDefinition['name'],
   //     (arg: string) => Promise<string>
   //   >;
 };
 
-function formatMetaLlamaError(data: {
+function formatA6000Error(data: {
   error: { message: string; type?: string; code?: string };
 }): string {
   let errorMessage = `API error: ${data.error.message}`;
@@ -67,7 +141,7 @@ function formatMetaLlamaError(data: {
 
 function calculateCost(
   modelName: string,
-  config: MetaLlamaAiSharedOptions,
+  config: A6000AiSharedOptions,
   promptTokens?: number,
   completionTokens?: number,
 ): number | undefined {
@@ -75,7 +149,7 @@ function calculateCost(
     return undefined;
   }
 
-  const model = [...META_LLAMA_CHAT_MODELS].find((m) => m.id === modelName);
+  const model = [...A6000_CHAT_MODELS].find((m) => m.id === modelName);
   if (!model || !model.cost) {
     return undefined;
   }
@@ -100,15 +174,15 @@ function getTokenUsage(data: any, cached: boolean): Partial<TokenUsage> {
   return {};
 }
 
-export class MetaLlamaGenericProvider implements ApiProvider {
+export class A6000GenericProvider implements ApiProvider {
   modelName: string;
 
-  config: MetaLlamaAiSharedOptions;
+  config: A6000AiSharedOptions;
   env?: EnvOverrides;
 
   constructor(
     modelName: string,
-    options: { config?: MetaLlamaAiSharedOptions; id?: string; env?: EnvOverrides } = {},
+    options: { config?: A6000AiSharedOptions; id?: string; env?: EnvOverrides } = {},
   ) {
     const { config, id, env } = options;
     this.env = env;
@@ -120,11 +194,11 @@ export class MetaLlamaGenericProvider implements ApiProvider {
   id(): string {
     return this.config.apiHost || this.config.apiBaseUrl
       ? this.modelName
-      : `MetaLlama:${this.modelName}`;
+      : `A6000:${this.modelName}`;
   }
 
   toString(): string {
-    return `[MetaLlama Provider ${this.modelName}]`;
+    return `[A6000 Provider ${this.modelName}]`;
   }
 
   getOrganization(): string | undefined {
@@ -140,19 +214,16 @@ export class MetaLlamaGenericProvider implements ApiProvider {
   }
 
   getApiUrl(): string {
-    const apiHost =
-      this.config.apiHost 
-       || this.env?.META_LLAMA_API_HOST
-      || process.env.META_LLAMA_API_HOST;
+    const apiHost = this.config.apiHost || this.env?.A6000_API_HOST || process.env.A6000_API_HOST;
     if (apiHost) {
       return `https://${apiHost}/v1`;
     }
     return (
       this.config.apiBaseUrl ||
-         this.env?.META_LLAMA_API_BASE_URL ||
-         this.env?.META_LLAMA_BASE_URL ||
-      process.env.META_LLAMA_API_BASE_URL ||
-      process.env.META_LLAMA_BASE_URL ||
+         this.env?.A6000_API_BASE_URL ||
+         this.env?.A6000_BASE_URL ||
+      process.env.A6000_API_BASE_URL ||
+      process.env.A6000_BASE_URL ||
       this.getApiUrlDefault()
     );
   }
@@ -165,7 +236,7 @@ export class MetaLlamaGenericProvider implements ApiProvider {
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
       //   this.env?.META_LLAMA_API_KEY ||
-      process.env.META_LLAMA_API_KEY
+      process.env.A6000_API_KEY
     );
   }
 
@@ -179,19 +250,19 @@ export class MetaLlamaGenericProvider implements ApiProvider {
   }
 }
 
-export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
-  static META_LLAMA_CHAT_MODELS = META_LLAMA_CHAT_MODELS;
+export class A6000ChatCompletionProvider extends A6000GenericProvider {
+  static META_LLAMA_CHAT_MODELS = A6000_CHAT_MODELS;
 
-  static META_LLAMA_CHAT_MODEL_NAMES = META_LLAMA_CHAT_MODELS.map((model) => model.id);
+  static META_LLAMA_CHAT_MODEL_NAMES = A6000_CHAT_MODELS.map((model) => model.id);
 
-  config: MetaLlamaCompletionOptions;
+  config: A6000CompletionOptions;
 
   constructor(
     modelName: string,
-    options: { config?: MetaLlamaCompletionOptions; id?: string; env?: EnvOverrides } = {},
+    options: { config?: A6000CompletionOptions; id?: string; env?: EnvOverrides } = {},
   ) {
-    if (!MetaLlamaChatCompletionProvider.META_LLAMA_CHAT_MODEL_NAMES.includes(modelName)) {
-      logger.debug(`Using unknown MetaLlama chat model: ${modelName}`);
+    if (!A6000ChatCompletionProvider.META_LLAMA_CHAT_MODEL_NAMES.includes(modelName)) {
+      logger.debug(`Using unknown A6000 chat model: ${modelName}`);
     }
     super(modelName, options);
     this.config = options.config || {};
@@ -205,7 +276,7 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
     // not use api key
     // if (!this.getApiKey()) {
     //   throw new Error(
-    //     'MetaLlama API key is not set. Set the MetaLlama_API_KEY environment variable or add `apiKey` to the provider config.',
+    //     'A6000 API key is not set. Set the A6000_API_KEY environment variable or add `apiKey` to the provider config.',
     //   );
     // }
 
@@ -221,7 +292,8 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
       presence_penalty:
         this.config.presence_penalty ?? parseFloat(process.env.META_LLAMA_PRESENCE_PENALTY || '0'),
       frequency_penalty:
-        this.config.frequency_penalty ?? parseFloat(process.env.META_LLAMA_FREQUENCY_PENALTY || '0'),
+        this.config.frequency_penalty ??
+        parseFloat(process.env.META_LLAMA_FREQUENCY_PENALTY || '0'),
       //   ...(this.config.functions
       //     ? { functions: renderVarsInObject(this.config.functions, context?.vars) }
       //     : {}),
@@ -233,7 +305,7 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
       ...(this.config.stop ? { stop: this.config.stop } : {}),
       ...(this.config.passthrough || {}),
     };
-    logger.debug(`Calling MetaLlama API: ${JSON.stringify(body)}`);
+    logger.debug(`Calling A6000 API: ${JSON.stringify(body)}`);
 
     let data,
       cached = false;
@@ -245,7 +317,7 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${this.getApiKey()}`,
-            ...(this.getOrganization() ? { 'MetaLlama-Organization': this.getOrganization() } : {}),
+            ...(this.getOrganization() ? { 'A6000-Organization': this.getOrganization() } : {}),
             ...this.config.headers,
           },
           body: JSON.stringify(body),
@@ -258,10 +330,10 @@ export class MetaLlamaChatCompletionProvider extends MetaLlamaGenericProvider {
       };
     }
 
-    logger.debug(`\tMetaLlama chat completions API response: ${JSON.stringify(data)}`);
+    logger.debug(`\tA6000 chat completions API response: ${JSON.stringify(data)}`);
     if (data.error) {
       return {
-        error: formatMetaLlamaError(data),
+        error: formatA6000Error(data),
       };
     }
     try {
