@@ -1,17 +1,8 @@
 import { z } from 'zod';
-import type {
-  ApiProvider,
-  CallApiFunction,
-  ProviderClassificationResponse,
-  ProviderEmbeddingResponse,
-  ProviderId,
-  ProviderLabel,
-  ProviderOptions,
-  ProviderResponse,
-  ProviderSimilarityResponse,
-} from '../types/providers';
+import type { ApiProvider, CallApiFunction, ProviderClassificationResponse, ProviderEmbeddingResponse, ProviderId, ProviderLabel, ProviderOptions, ProviderResponse, ProviderSimilarityResponse } from '../types/providers';
 import { PromptSchema } from './prompts';
 import { NunjucksFilterMapSchema, TokenUsageSchema } from './shared';
+
 
 export const ProviderEnvOverridesSchema = z.object({
   ANTHROPIC_API_KEY: z.string().optional(),
@@ -45,6 +36,21 @@ export const ProviderEnvOverridesSchema = z.object({
   MISTRAL_API_KEY: z.string().optional(),
   CLOUDFLARE_API_KEY: z.string().optional(),
   CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
+  SALTLUX_API_KEY: z.string().optional(),
+  UPSTAGE_API_HOST: z.string().optional(),
+  UPSTAGE_API_BASE_URL: z.string().optional(),
+  UPSTAGE_BASE_URL: z.string().optional(),
+  SALTLUX_API_HOST: z.string().optional(),
+  SALTLUX_API_BASE_URL: z.string().optional(),
+  SALTLUX_BASE_URL: z.string().optional(),
+  A6000_API_HOST: z.string().optional(),
+  A6000_API_BASE_URL: z.string().optional(),
+  A6000_BASE_URL: z.string().optional(),
+  A6000_MODEL_NAME: z.string().optional(),
+  A770_API_HOST: z.string().optional(),
+  A770_API_BASE_URL: z.string().optional(),
+  A770_BASE_URL: z.string().optional(),
+  A770_MODEL_NAME: z.string().optional(),
 });
 
 export const ProviderOptionsSchema = z
