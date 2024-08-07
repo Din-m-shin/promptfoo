@@ -377,7 +377,7 @@ export async function loadApiProvider(
   } else if (providerPath.startsWith('a6000:')) {
     console.log('a6000 provider');
     const splits = providerPath.split(':');
-    const modelName = env?.A770_MODEL_NAME || process.env.A770_MODEL_NAME || 'a6000 Model Name';
+    const modelName = env?.A6000_MODEL_NAME || process.env.A6000_MODEL_NAME || 'a6000 Model Name';
     console.log('a6000 modelName ', modelName);
 
     ret = new A6000ChatCompletionProvider(modelName, providerOptions);

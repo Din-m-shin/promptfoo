@@ -247,13 +247,15 @@ const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange
 
     if (
       provider.id === 'a6000:Enter-the-model-name-and-baseURL-in-API-keys-settings' ||
-      provider.id === 'A6000 Model Name'
+      provider.id === 'a6000:A6000 Model Name' ||
+      provider.id != process.env.A6000_MODEL_NAME
     ) {
       const modelName = process.env.A6000_MODEL_NAME || 'A6000 Model Name';
       provider.id = 'a6000:' + modelName;
     } else if (
       provider.id === 'a770:Enter-the-model-name-and-baseURL-in-API-keys-settings' ||
-      provider.id === 'a770 Model Name'
+      provider.id === 'a770:a770 Model Name' ||
+      provider.id != process.env.A770_MODEL_NAME
     ) {
       const modelName = process.env.A770_MODEL_NAME || 'a770 Model Name';
       provider.id = 'a770:' + modelName;
