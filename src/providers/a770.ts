@@ -350,13 +350,20 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
     try {
       const message = data.choices[0].message;
       let output = '';
-      if (message.content && (message.function_call || message.tool_calls)) {
-        output = message;
-      } else if (message.content === null) {
-        output = message.function_call || message.tool_calls;
-      } else {
+      // if (message.content && (message.function_call || message.tool_calls)) {
+      //   output = message;
+      // } else if (message.content === null) {
+      //   output = message.function_call || message.tool_calls;
+      // } else {
+      //   output = message.content;
+      // }
+
+      if (message.content) {
         output = message.content;
+      } else {
+        output = message;
       }
+      
       const logProbs = data.choices[0].logprobs?.content?.map(
         (logProbObj: { token: string; logprob: number }) => logProbObj.logprob,
       );
