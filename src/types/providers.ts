@@ -132,7 +132,22 @@ export type EnvOverrides = {
   VERTEX_PUBLISHER?: string;
   MISTRAL_API_KEY?: string;
   CLOUDFLARE_API_KEY?: string;
-  CLOUDFLARE_ACCOUNT_ID?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;  
+  SALTLUX_API_KEY?: string;
+  UPSTAGE_API_HOST?: string;
+  UPSTAGE_API_BASE_URL?: string;
+  UPSTAGE_BASE_URL?: string;
+  SALTLUX_API_HOST?: string;
+  SALTLUX_API_BASE_URL?: string;
+  SALTLUX_BASE_URL?: string;
+  A6000_API_HOST?: string;
+  A6000_API_BASE_URL?: string;
+  A6000_BASE_URL?: string;
+  A6000_MODEL_NAME?: string;
+  A770_API_HOST?: string;
+  A770_API_BASE_URL?: string;
+  A770_BASE_URL?: string;
+  A770_MODEL_NAME?: string;
 };
 
 export type FilePath = string;
