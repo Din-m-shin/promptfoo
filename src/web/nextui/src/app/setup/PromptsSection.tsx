@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getApiBaseUrl } from '@/api';
 import { useStore } from '@/state/evalConfig';
 import Copy from '@mui/icons-material/ContentCopy';
 import Delete from '@mui/icons-material/Delete';
@@ -35,20 +36,57 @@ const PromptsSection: React.FC = () => {
     setPromptDialogOpen(true);
   };
 
-  const handleAddPromptFromFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddPromptFromFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.stopPropagation();
     event.preventDefault();
 
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result?.toString();
-        if (text) {
-          setPrompts([...prompts, text]);
+      if (file.type === 'application/json') {
+        const formdata = new FormData();
+
+        formdata.append('files', file);
+
+        const requestOptions = { method: 'POST', body: formdata };
+        const apiBaseUrl = await getApiBaseUrl();
+        const response = await fetch(`${apiBaseUrl}/api/prompts`, requestOptions);
+
+        if (response.ok) {
+          const result = await response.json();
+
+          if (!result.data && result.status === 409) {
+            alert(
+              'A file with the same name already exists. Please rename your file and try again.',
+            );
+            return;
+          }
+
+          if (!result.data) {
+            console.error('Failed to upload file: ', result.error);
+            return;
+          }
+
+          if (result.data.errno === -2) {
+             alert('Upload failed due to an incorrect save path permission.');
+            return;
+          }
+          if (result.data.path) {
+            setPrompts([...prompts, result.data.path]);
+          }
+          
         }
-      };
-      reader.readAsText(file);
+      }
+
+      if (file.type === 'text/plain' || file.type === 'text/markdown') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target?.result?.toString();
+          if (text) {
+            setPrompts([...prompts, text]);
+          }
+        };
+        reader.readAsText(file);
+      }
     }
   };
 
@@ -84,7 +122,7 @@ const PromptsSection: React.FC = () => {
                 <input
                   id={`file-input-add-prompt`}
                   type="file"
-                  accept=".txt,.md"
+                  accept=".txt,.md,.json"
                   onChange={handleAddPromptFromFile}
                   style={{ display: 'none' }}
                 />
