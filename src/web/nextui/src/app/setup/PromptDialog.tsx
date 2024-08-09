@@ -10,7 +10,7 @@ import {
   Select,
   MenuItem,
   Typography,
-  TextareaAutosize,
+  TextareaAutosize
 } from '@mui/material';
 
 interface PromptDialogProps {
@@ -63,20 +63,12 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
   };
 
   React.useEffect(() => {
-    const loadResources = async () => {
-      if (open) {
-        try {
-          await fetchJsonFiles();
-          setSelectedFile('');
-          setEditingPrompt('');
-          await fetchFileContent('');
-        } catch (error) {
-          console.error('Initialization failed:', error);
-        }
-      }
-    };
-
-    loadResources();
+    if (open) {
+      fetchJsonFiles();
+      setSelectedFile('');
+      setEditingPrompt('');
+      fetchFileContent('');
+    }
 
     setEditingPrompt(prompt);
   }, [prompt, open]);
