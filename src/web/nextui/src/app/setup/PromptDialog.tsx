@@ -7,6 +7,9 @@ import {
   DialogActions,
   TextField,
   Button,
+  Select,
+  MenuItem,
+  Typography,
 } from '@mui/material';
 
 interface PromptDialogProps {
