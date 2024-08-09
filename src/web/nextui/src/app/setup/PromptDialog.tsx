@@ -10,6 +10,7 @@ import {
   Select,
   MenuItem,
   Typography,
+  TextareaAutosize,
 } from '@mui/material';
 
 interface PromptDialogProps {
@@ -62,12 +63,20 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
   };
 
   React.useEffect(() => {
-    if (open) {
-      fetchJsonFiles();
-      setSelectedFile('');
-      setEditingPrompt('');
-      fetchFileContent('');
-    }
+    const loadResources = async () => {
+      if (open) {
+        try {
+          await fetchJsonFiles();
+          setSelectedFile('');
+          setEditingPrompt('');
+          await fetchFileContent('');
+        } catch (error) {
+          console.error('Initialization failed:', error);
+        }
+      }
+    };
+
+    loadResources();
 
     setEditingPrompt(prompt);
   }, [prompt, open]);
@@ -128,16 +137,24 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
           ))}
         </Select>
         {fileContent && (
-          <Typography style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>
-            {(() => {
-              try {
-                return JSON.stringify(JSON.parse(fileContent), null, 2);
-              } catch (e) {
-                console.error('Error parsing JSON', e);
-                return 'Invalid JSON content.';
-              }
-            })()}
-          </Typography>
+          <>
+            <Typography variant="subtitle1" style={{ marginBottom: '1rem', marginTop: '1rem' }}>
+              Json content of the selected file
+            </Typography>
+            <TextareaAutosize
+              readOnly
+              value={(() => {
+                try {
+                  return JSON.stringify(JSON.parse(fileContent), null, 2);
+                } catch (e) {
+                  console.error('Error parsing JSON', e);
+                  return 'Invalid JSON content.';
+                }
+              })()}
+              style={{ width: '100%', padding: '0.75rem' }}
+              maxRows={20}
+            />
+          </>
         )}
       </DialogContent>
       <DialogActions>
