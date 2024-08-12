@@ -48,14 +48,17 @@ const YamlEditorComponent: React.FC = () => {
     const envString = JSON.stringify(yamlObj.env);
     const modifiedEnvString = envString.replace(/[{}"]/g, '');
     if (modifiedEnvString) {
-      const splits = modifiedEnvString.split(':');
-      if (splits[0].includes('A6000_MODEL_NAME')) {
-        const modelName = splits[1];
-        process.env.A6000_MODEL_NAME = modelName;
-      } else if (splits[0].includes('A770_MODEL_NAME')) {
-        const modelName = splits[1];
-        process.env.A770_MODEL_NAME = modelName;
-      }
+      const pairs = modifiedEnvString.split(',');
+      pairs.forEach((pair) => {
+        const splits = pair.split(':');
+        if (splits[0].includes('A6000_MODEL_NAME')) {
+          const modelName = splits[1];
+          process.env.A6000_MODEL_NAME = modelName;
+        } else if (splits[0].includes('A770_MODEL_NAME')) {
+          const modelName = splits[1];
+          process.env.A770_MODEL_NAME = modelName;
+        }
+      });
     }
 
     setEvaluateOptions(yamlObj.evaluateOptions || {});
