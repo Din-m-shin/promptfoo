@@ -35,6 +35,23 @@ const RunTestSuiteButton: React.FC = () => {
       tests: testCases,
     };
 
+    const { A6000_MODEL_NAME, A770_MODEL_NAME } = testSuite.env;
+
+    if (A6000_MODEL_NAME) {
+      process.env.A6000_MODEL_NAME = A6000_MODEL_NAME;
+    }
+    if (A770_MODEL_NAME) {
+      process.env.A770_MODEL_NAME = A770_MODEL_NAME;
+    }
+
+    testSuite.providers.map((provider) => {
+      if (provider.id && provider.id.includes('a6000:')) {
+        provider.id = `a6000:${process.env.A6000_MODEL_NAME}`;
+      } else if (provider.id && provider.id.includes('a770:')) {
+        provider.id = `a770:${process.env.A770_MODEL_NAME}`;
+      }
+    });
+
     try {
       const response = await fetch(`${NEXTJS_BASE_URL}/api/eval/job/`, {
         method: 'POST',
