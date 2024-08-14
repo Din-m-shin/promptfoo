@@ -8,7 +8,7 @@ import invariant from 'tiny-invariant';
 import { runAssertions, runCompareAssertion } from './assertions';
 import { fetchWithCache, getCache } from './cache';
 import cliState from './cliState';
-import { renderPrompt } from './evaluatorHelpers';
+import { renderPrompt, runExtensionHook } from './evaluatorHelpers';
 import logger from './logger';
 import { maybeEmitAzureOpenAiWarning } from './providers/azureopenaiUtil';
 import { generatePrompts } from './suggestions';
@@ -343,6 +343,8 @@ class Evaluator {
     const { testSuite, options } = this;
     const prompts: CompletedPrompt[] = [];
 
+    await runExtensionHook(testSuite.extensions, 'beforeAll', { suite: testSuite });
+
     if (options.generateSuggestions) {
       // TODO(ian): Move this into its own command/file
       logger.info(`Generating prompt variations...`);
@@ -595,6 +597,9 @@ class Evaluator {
         throw new Error('Expected index to be a number');
       }
 
+      await runExtensionHook(testSuite.extensions, 'beforeEach', {
+        test: evalStep.test,
+      });
       const row = await this.runEval(evalStep);
 
       results.push(row);
@@ -665,7 +670,7 @@ class Evaluator {
       }
 
       if (testSuite.derivedMetrics) {
-        const math = await import('mathjs');
+        const math = await import('mathjs'); // TODO: move this
         for (const metric of testSuite.derivedMetrics) {
           if (metrics.namedScores[metric.name] === undefined) {
             metrics.namedScores[metric.name] = 0;
@@ -700,6 +705,11 @@ class Evaluator {
       metrics.tokenUsage.total =
         (metrics.tokenUsage.total || 0) + (row.response?.tokenUsage?.total || 0);
       metrics.cost += row.cost || 0;
+
+      await runExtensionHook(testSuite.extensions, 'afterEach', {
+        test: evalStep.test,
+        result: row,
+      });
     };
 
     // Set up main progress bars
@@ -891,6 +901,11 @@ class Evaluator {
     if (progressBar) {
       progressBar.stop();
     }
+
+    await runExtensionHook(testSuite.extensions, 'afterAll', {
+      results: results,
+      suite: testSuite,
+    });
 
     telemetry.record('eval_ran', {
       numPrompts: prompts.length,
