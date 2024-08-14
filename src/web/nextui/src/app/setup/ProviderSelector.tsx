@@ -191,10 +191,10 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
       id,
       config: {
         temperature: 0.7,
-        top_p: 0.9,
-        top_k: -1,
+        top_p: 0.1,
+        top_k: 0,
         max_tokens: 1000,
-        repetition_penalty: 1.15,
+        repetition_penalty: 0,
       },
     })),
   )
@@ -203,10 +203,10 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
       id,
       config: {
         temperature: 1,
-        top_p: 0.95,
-        top_k: 40,
+        top_p: 0.1,
+        top_k: 0,
         max_tokens: 1000,
-        repetition_penalty: 1.15,
+        repetition_penalty: 0,
       },
     })),
   )
