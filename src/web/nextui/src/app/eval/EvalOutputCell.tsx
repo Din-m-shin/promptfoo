@@ -358,6 +358,8 @@ function EvalOutputCell({
             gradingResults={output.gradingResult?.componentResults}
             output={text}
             metadata={output.metadata}
+            calling_jaon={output.calling_jaon}
+            response_json={output.response_json}
           />
         </>
       )}

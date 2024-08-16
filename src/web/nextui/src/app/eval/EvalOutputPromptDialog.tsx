@@ -93,6 +93,8 @@ interface EvalOutputPromptDialogProps {
   output?: string;
   gradingResults?: GradingResult[];
   metadata?: Record<string, any>;
+  calling_jaon?: string;
+  response_json?: string;
 }
 
 export default function EvalOutputPromptDialog({
@@ -103,6 +105,8 @@ export default function EvalOutputPromptDialog({
   output,
   gradingResults,
   metadata,
+  calling_jaon,
+  response_json,
 }: EvalOutputPromptDialogProps) {
   const [copied, setCopied] = useState(false);
   const [expandedMetadata, setExpandedMetadata] = useState<{ [key: string]: boolean }>({});
@@ -206,6 +210,54 @@ export default function EvalOutputPromptDialog({
                 </TableBody>
               </Table>
             </TableContainer>
+          </Box>
+        )}
+        {calling_jaon && (
+          <Box my={2}>
+            <Typography variant="subtitle1" style={{ marginBottom: '1rem', marginTop: '1rem' }}>
+              Call
+            </Typography>
+            <TextareaAutosize
+              readOnly
+              maxRows={20}
+              value={(() => {
+                try {
+                  if (typeof calling_jaon === 'string') {
+                    return JSON.stringify(JSON.parse(calling_jaon), null, 2);
+                  } else {
+                    return JSON.stringify(calling_jaon, null, 2);
+                  }
+                } catch (e) {
+                  console.error('Error parsing JSON', e);
+                  return 'Invalid JSON content.';
+                }
+              })()}
+              style={{ width: '100%', padding: '0.75rem' }}
+            />
+          </Box>
+        )}
+        {response_json && (
+          <Box my={2}>
+            <Typography variant="subtitle1" style={{ marginBottom: '1rem', marginTop: '1rem' }}>
+              Response
+            </Typography>
+            <TextareaAutosize
+              readOnly
+              maxRows={20}
+              value={(() => {
+                try {
+                  if (typeof response_json === 'string') {
+                    return JSON.stringify(JSON.parse(response_json), null, 2);
+                  } else {
+                    return JSON.stringify(response_json, null, 2);
+                  }
+                } catch (e) {
+                  console.error('Error parsing JSON', e);
+                  return 'Invalid JSON content.';
+                }
+              })()}
+              style={{ width: '100%', padding: '0.75rem' }}
+            />
           </Box>
         )}
       </DialogContent>

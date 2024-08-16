@@ -192,6 +192,8 @@ export interface EvaluateResult {
   namedScores: Record<string, number>;
   cost?: number;
   metadata?: Record<string, any>;
+  calling_jaon?: string;
+  response_json?: string;
 }
 
 export interface EvaluateTableOutput {
@@ -206,6 +208,8 @@ export interface EvaluateTableOutput {
   gradingResult?: GradingResult;
   cost: number;
   metadata?: Record<string, any>;
+  calling_jaon?: string;
+  response_json?: string;
 }
 
 export interface EvaluateTableRow {

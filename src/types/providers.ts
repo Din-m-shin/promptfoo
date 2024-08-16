@@ -82,6 +82,8 @@ export interface ProviderResponse {
   };
   output?: string | any;
   tokenUsage?: TokenUsage;
+  calling_jaon?: string | any;
+  response_json?: string | any;
 }
 
 export interface ProviderEmbeddingResponse {
