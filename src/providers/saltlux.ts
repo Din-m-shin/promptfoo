@@ -263,6 +263,8 @@ export class SaltluxChatCompletionProvider extends SaltluxGenericProvider {
       };
     }
     try {
+    const calling_jaon = body;
+    const response_json = data;
     //   const message = data.choices[0].message;
     const message = data.message;
       let output = '';
@@ -313,6 +315,8 @@ export class SaltluxChatCompletionProvider extends SaltluxGenericProvider {
           data.usage?.prompt_tokens,
           data.usage?.completion_tokens,
         ),
+        calling_jaon,
+        response_json,
       };
     } catch (err) {
       return {

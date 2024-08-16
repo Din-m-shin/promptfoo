@@ -524,6 +524,8 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
       };
     }
     try {
+      const calling_jaon = body;
+      const response_json = data;
       const message = data.choices[0].message;
       let output = '';
       if (message.content && (message.function_call || message.tool_calls)) {
@@ -573,6 +575,8 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
           data.usage?.prompt_tokens,
           data.usage?.completion_tokens,
         ),
+        calling_jaon,
+        response_json,
       };
     } catch (err) {
       return {
