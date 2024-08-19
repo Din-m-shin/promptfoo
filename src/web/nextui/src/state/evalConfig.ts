@@ -73,6 +73,23 @@ export const useStore = create<State>()(
                 !p.endsWith('.json') &&
                 !p.endsWith('.yaml'),
             );
+
+            if (typeof config.prompts === 'object') {
+              const updatedPrompts = config.prompts
+                .map((prompt) => {
+                  if (typeof prompt === 'object' && 'label' in prompt) {
+                    return { content: prompt.label };
+                  } else if (typeof prompt === 'string') {
+                    return { content: prompt };
+                  } else {
+                    console.warn('Invalid prompt type', prompt);
+                    return null;
+                  }
+                })
+                .filter((prompt) => prompt !== null); 
+
+              updates.prompts = updatedPrompts.map((prompt) => prompt.content);
+            }
           } else {
             console.warn('Invalid prompts config', config.prompts);
           }
