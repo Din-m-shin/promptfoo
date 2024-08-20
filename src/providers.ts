@@ -17,6 +17,7 @@ import { BAMChatProvider, BAMEmbeddingProvider } from './providers/bam';
 import { AwsBedrockCompletionProvider, AwsBedrockEmbeddingProvider } from './providers/bedrock';
 import * as CloudflareAiProviders from './providers/cloudflare-ai';
 import { CohereChatCompletionProvider } from './providers/cohere';
+import { GroqProvider } from './providers/groq';
 import { HttpProvider } from './providers/http';
 import {
   HuggingfaceFeatureExtractionProvider,
@@ -394,6 +395,9 @@ export async function loadApiProvider(
     console.log('a770 modelName ', modelName);
 
     ret = new A770ChatCompletionProvider(modelName, providerOptions);
+  } else if (providerPath.startsWith('groq:')) {
+    const modelName = providerPath.split(':')[1];
+    ret = new GroqProvider(modelName, providerOptions);
   } else {
     if (providerPath.startsWith('file://')) {
       providerPath = providerPath.slice('file://'.length);
@@ -470,5 +474,6 @@ export default {
   LocalAiChatProvider,
   BAMChatProvider,
   BAMEmbeddingProvider,
+  GroqProvider,
   loadApiProvider,
 };
