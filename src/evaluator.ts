@@ -250,7 +250,11 @@ class Evaluator {
       };
       if (response.error) {
         ret.error = response.error;
-      } else if (response.output != null) {
+      } else if (response.output == null) {
+        ret.success = false;
+        ret.score = 0;
+        ret.error = 'No output';
+      } else {
         // Create a copy of response so we can potentially mutate it.
         const processedResponse = { ...response };
         const transforms: string[] = [
@@ -289,10 +293,6 @@ class Evaluator {
         }
         ret.response = processedResponse;
         ret.gradingResult = checkResult;
-      } else {
-        ret.success = false;
-        ret.score = 0;
-        ret.error = 'No output';
       }
 
       // Update token usage stats
@@ -850,9 +850,7 @@ class Evaluator {
         const gradingResults = await runCompareAssertion(row.test, compareAssertion, outputs);
         row.outputs.forEach((output, index) => {
           const gradingResult = gradingResults[index];
-          if (!output.gradingResult) {
-            output.gradingResult = gradingResult;
-          } else {
+          if (output.gradingResult) {
             output.gradingResult.tokensUsed = output.gradingResult.tokensUsed || {
               total: 0,
               prompt: 0,
@@ -883,6 +881,8 @@ class Evaluator {
               output.gradingResult.componentResults = [];
             }
             output.gradingResult.componentResults.push(gradingResult);
+          } else {
+            output.gradingResult = gradingResult;
           }
         });
         if (progressBar) {
