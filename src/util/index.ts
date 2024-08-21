@@ -42,7 +42,7 @@ import {
 import { getConfigDirectoryPath } from './config';
 import { getNunjucksEngine } from './templates';
 
-const DEFAULT_QUERY_LIMIT = 100;
+const DEFAULT_QUERY_LIMIT = 1000;
 
 const outputToSimpleString = (output: EvaluateTableOutput) => {
   const passFailText = output.pass ? '[PASS]' : '[FAIL]';
