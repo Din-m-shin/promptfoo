@@ -6,6 +6,7 @@ import { importModule } from './esm';
 import logger from './logger';
 import { A770ChatCompletionProvider } from './providers/a770';
 import { A6000ChatCompletionProvider } from './providers/a6000';
+import { AI21ChatCompletionProvider } from './providers/ai21';
 import { AnthropicCompletionProvider, AnthropicMessagesProvider } from './providers/anthropic';
 import {
   AzureOpenAiAssistantProvider,
@@ -418,6 +419,9 @@ export async function loadApiProvider(
   } else if (providerPath.startsWith('groq:')) {
     const modelName = providerPath.split(':')[1];
     ret = new GroqProvider(modelName, providerOptions);
+  } else if (providerPath.startsWith('ai21:')) {
+    const modelName = providerPath.split(':')[1];
+    ret = new AI21ChatCompletionProvider(modelName, providerOptions);
   } else {
     if (providerPath.startsWith('file://')) {
       providerPath = providerPath.slice('file://'.length);
