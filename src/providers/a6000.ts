@@ -287,15 +287,17 @@ export class A6000ChatCompletionProvider extends A6000GenericProvider {
       model: this.modelName,
       messages: messages,
       seed: this.config.seed || 0,
-      max_tokens: this.config.max_tokens ?? parseInt(process.env.A6000_MAX_TOKENS || '1024'),
-      temperature: this.config.temperature ?? parseFloat(process.env.A6000_TEMPERATURE || '0'),
+      max_tokens: this.config.max_tokens ?? Number.parseInt(process.env.A6000_MAX_TOKENS || '1024'),
+      temperature:
+        this.config.temperature ?? Number.parseFloat(process.env.A6000_TEMPERATURE || '0'),
       stream: this.config.stream ?? false,
-      top_p: this.config.top_p ?? parseFloat(process.env.A770_TOP_P || '1'),
+      top_p: this.config.top_p ?? Number.parseFloat(process.env.A770_TOP_P || '1'),
       presence_penalty:
-        this.config.presence_penalty ?? parseFloat(process.env.META_LLAMA_PRESENCE_PENALTY || '0'),
+        this.config.presence_penalty ??
+        Number.parseFloat(process.env.META_LLAMA_PRESENCE_PENALTY || '0'),
       frequency_penalty:
         this.config.frequency_penalty ??
-        parseFloat(process.env.META_LLAMA_FREQUENCY_PENALTY || '0'),
+        Number.parseFloat(process.env.META_LLAMA_FREQUENCY_PENALTY || '0'),
       //   ...(this.config.functions
       //     ? { functions: renderVarsInObject(this.config.functions, context?.vars) }
       //     : {}),
