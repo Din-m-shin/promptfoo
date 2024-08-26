@@ -95,6 +95,7 @@ interface EvalOutputPromptDialogProps {
   metadata?: Record<string, any>;
   calling_jaon?: string;
   response_json?: string;
+  timeToFirstToken?: number;
 }
 
 export default function EvalOutputPromptDialog({
@@ -107,6 +108,7 @@ export default function EvalOutputPromptDialog({
   metadata,
   calling_jaon,
   response_json,
+  timeToFirstToken,
 }: EvalOutputPromptDialogProps) {
   const [copied, setCopied] = useState(false);
   const [expandedMetadata, setExpandedMetadata] = useState<{ [key: string]: boolean }>({});
@@ -258,6 +260,14 @@ export default function EvalOutputPromptDialog({
               })()}
               style={{ width: '100%', padding: '0.75rem' }}
             />
+          </Box>
+        )}
+        {timeToFirstToken && (
+          <Box my={2}>
+            <Typography variant="subtitle1" style={{ marginBottom: '1rem' }}>
+              Time to First Token
+            </Typography>
+            <Typography variant="body1">{timeToFirstToken} ms</Typography>
           </Box>
         )}
       </DialogContent>
