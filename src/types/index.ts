@@ -194,6 +194,7 @@ export interface EvaluateResult {
   metadata?: Record<string, any>;
   calling_jaon?: string;
   response_json?: string;
+  timeToFirstToken?: number;
 }
 
 export interface EvaluateTableOutput {
@@ -210,6 +211,7 @@ export interface EvaluateTableOutput {
   metadata?: Record<string, any>;
   calling_jaon?: string;
   response_json?: string;
+  timeToFirstToken?: number;
 }
 
 export interface EvaluateTableRow {

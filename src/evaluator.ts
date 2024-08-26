@@ -182,6 +182,7 @@ class Evaluator {
         cached: false,
         calling_jaon: '',
         response_json: '',
+        timeToFirstToken: 0,
       };
 
       if (test.providerOutput) {
@@ -318,6 +319,10 @@ class Evaluator {
       if (response.response_json) {
         ret.response_json = JSON.stringify(response.response_json);
       } 
+
+      if (response.timeToFirstToken) {
+        ret.timeToFirstToken = response.timeToFirstToken;
+      }
 
       return ret;
     } catch (err) {
@@ -648,6 +653,7 @@ class Evaluator {
         metadata: row.metadata,
         calling_jaon: row.calling_jaon,
         response_json: row.response_json,
+        timeToFirstToken: row.timeToFirstToken,
       };
 
       const metrics = table.head.prompts[colIndex].metrics;

@@ -360,6 +360,7 @@ function EvalOutputCell({
             metadata={output.metadata}
             calling_jaon={output.calling_jaon}
             response_json={output.response_json}
+            timeToFirstToken={output.timeToFirstToken}
           />
         </>
       )}
