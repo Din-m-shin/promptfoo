@@ -216,17 +216,14 @@ export class A770GenericProvider implements ApiProvider {
 
   getApiUrl(): string {
     //logger.error(`A770_BASE_URL: ${this.env?.A770_BASE_URL}`);
-    const apiHost =
-      this.config.apiHost
-      || this.env?.A770_API_HOST
-      || process.env.A770_API_HOST;
+    const apiHost = this.config.apiHost || this.env?.A770_API_HOST || process.env.A770_API_HOST;
     if (apiHost) {
       return `https://${apiHost}/v1`;
     }
     return (
       this.config.apiBaseUrl ||
-         this.env?.A770_API_BASE_URL ||
-         this.env?.A770_BASE_URL ||
+      this.env?.A770_API_BASE_URL ||
+      this.env?.A770_BASE_URL ||
       process.env.A770_API_BASE_URL ||
       process.env.A770_BASE_URL ||
       this.getApiUrlDefault()
@@ -234,10 +231,7 @@ export class A770GenericProvider implements ApiProvider {
   }
 
   getModelName(): string | undefined {
-    return (
-         this.env?.A770_MODEL_NAME ||
-      process.env.A770_MODEL_NAME
-    );
+    return this.env?.A770_MODEL_NAME || process.env.A770_MODEL_NAME;
   }
 
   getApiKey(): string | undefined {
@@ -298,15 +292,16 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
       model: this.modelName,
       messages: messages,
       seed: this.config.seed || 0,
-      max_tokens: this.config.max_tokens ?? parseInt(process.env.A770_MAX_TOKENS || '1024'),
-      temperature: this.config.temperature ?? parseFloat(process.env.A770_TEMPERATURE || '0'),
+      max_tokens: this.config.max_tokens ?? Number.parseInt(process.env.A770_MAX_TOKENS || '1024'),
+      temperature:
+        this.config.temperature ?? Number.parseFloat(process.env.A770_TEMPERATURE || '0'),
       stream: this.config.stream ?? false,
-      top_p: this.config.top_p ?? parseFloat(process.env.A770_TOP_P || '1'),
+      top_p: this.config.top_p ?? Number.parseFloat(process.env.A770_TOP_P || '1'),
       presence_penalty:
-        this.config.presence_penalty ?? parseFloat(process.env.A770_PRESENCE_PENALTY || '0'),
+        this.config.presence_penalty ?? Number.parseFloat(process.env.A770_PRESENCE_PENALTY || '0'),
       frequency_penalty:
         this.config.frequency_penalty ??
-        parseFloat(process.env.A770_FREQUENCY_PENALTY || '0'),
+        Number.parseFloat(process.env.A770_FREQUENCY_PENALTY || '0'),
       //   ...(this.config.functions
       //     ? { functions: renderVarsInObject(this.config.functions, context?.vars) }
       //     : {}),

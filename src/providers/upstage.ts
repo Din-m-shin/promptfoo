@@ -32,9 +32,9 @@ type UpstageCompletionOptions = UpstageAiSharedOptions & {
   frequency_penalty?: number;
   presence_penalty?: number;
   best_of?: number;
-//   functions?: UpstageFunction[];
+  //   functions?: UpstageFunction[];
   function_call?: 'none' | 'auto' | { name: string };
-//   tools?: UpstageTool[];
+  //   tools?: UpstageTool[];
   tool_choice?: 'none' | 'auto' | 'required' | { type: 'function'; function?: { name: string } };
   response_format?: { type: 'json_object' };
   stop?: string[];
@@ -45,10 +45,10 @@ type UpstageCompletionOptions = UpstageAiSharedOptions & {
    * If set, automatically call these functions when the assistant activates
    * these function tools.
    */
-//   functionToolCallbacks?: Record<
-//     Upstage.FunctionDefinition['name'],
-//     (arg: string) => Promise<string>
-//   >;
+  //   functionToolCallbacks?: Record<
+  //     Upstage.FunctionDefinition['name'],
+  //     (arg: string) => Promise<string>
+  //   >;
 };
 
 
@@ -131,9 +131,9 @@ export class UpstageGenericProvider implements ApiProvider {
 
   getOrganization(): string | undefined {
     return (
-      this.config.organization 
-    //   || this.env?.UPSTAGE_ORGANIZATION 
-      || process.env.UPSTAGE_ORGANIZATION
+      this.config.organization ||
+      //   || this.env?.UPSTAGE_ORGANIZATION
+      process.env.UPSTAGE_ORGANIZATION
     );
   }
 
@@ -143,16 +143,14 @@ export class UpstageGenericProvider implements ApiProvider {
 
   getApiUrl(): string {
     const apiHost =
-      this.config.apiHost 
-       || this.env?.UPSTAGE_API_HOST 
-      || process.env.UPSTAGE_API_HOST;
+      this.config.apiHost || this.env?.UPSTAGE_API_HOST || process.env.UPSTAGE_API_HOST;
     if (apiHost) {
       return `https://${apiHost}/v1`;
     }
     return (
       this.config.apiBaseUrl ||
-       this.env?.UPSTAGE_API_BASE_URL ||
-       this.env?.UPSTAGE_BASE_URL ||
+      this.env?.UPSTAGE_API_BASE_URL ||
+      this.env?.UPSTAGE_BASE_URL ||
       process.env.UPSTAGE_API_BASE_URL ||
       process.env.UPSTAGE_BASE_URL ||
       this.getApiUrlDefault()
@@ -166,7 +164,7 @@ export class UpstageGenericProvider implements ApiProvider {
         ? process.env[this.config.apiKeyEnvar] ||
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
-    //   this.env?.Upstage_API_KEY ||
+      //   this.env?.Upstage_API_KEY ||
       process.env.UPSTAGE_API_KEY
     );
   }
@@ -218,18 +216,22 @@ export class UpstageChatCompletionProvider extends UpstageGenericProvider {
       model: this.modelName,
       messages: messages,
       seed: this.config.seed || 0,
-      max_tokens: this.config.max_tokens ?? parseInt(process.env.Upstage_MAX_TOKENS || '1024'),
-      temperature: this.config.temperature ?? parseFloat(process.env.Upstage_TEMPERATURE || '0'),
-      top_p: this.config.top_p ?? parseFloat(process.env.Upstage_TOP_P || '1'),
+      max_tokens:
+        this.config.max_tokens ?? Number.parseInt(process.env.Upstage_MAX_TOKENS || '1024'),
+      temperature:
+        this.config.temperature ?? Number.parseFloat(process.env.Upstage_TEMPERATURE || '0'),
+      top_p: this.config.top_p ?? Number.parseFloat(process.env.Upstage_TOP_P || '1'),
       presence_penalty:
-        this.config.presence_penalty ?? parseFloat(process.env.Upstage_PRESENCE_PENALTY || '0'),
+        this.config.presence_penalty ??
+        Number.parseFloat(process.env.Upstage_PRESENCE_PENALTY || '0'),
       frequency_penalty:
-        this.config.frequency_penalty ?? parseFloat(process.env.Upstage_FREQUENCY_PENALTY || '0'),
-    //   ...(this.config.functions
-    //     ? { functions: renderVarsInObject(this.config.functions, context?.vars) }
-    //     : {}),
+        this.config.frequency_penalty ??
+        Number.parseFloat(process.env.Upstage_FREQUENCY_PENALTY || '0'),
+      //   ...(this.config.functions
+      //     ? { functions: renderVarsInObject(this.config.functions, context?.vars) }
+      //     : {}),
       ...(this.config.function_call ? { function_call: this.config.function_call } : {}),
-    //   ...(this.config.tools ? { tools: renderVarsInObject(this.config.tools, context?.vars) } : {}),
+      //   ...(this.config.tools ? { tools: renderVarsInObject(this.config.tools, context?.vars) } : {}),
       ...(this.config.tool_choice ? { tool_choice: this.config.tool_choice } : {}),
       ...(this.config.response_format ? { response_format: this.config.response_format } : {}),
       ...(callApiOptions?.includeLogProbs ? { logprobs: callApiOptions.includeLogProbs } : {}),
@@ -284,29 +286,29 @@ export class UpstageChatCompletionProvider extends UpstageGenericProvider {
       );
 
       // Handle function tool callbacks
-    //   const functionCalls = message.function_call ? [message.function_call] : message.tool_calls;
-    //   if (functionCalls && this.config.functionToolCallbacks) {
-    //     for (const functionCall of functionCalls) {
-    //       const functionName = functionCall.name;
-    //       if (this.config.functionToolCallbacks[functionName]) {
-    //         const functionResult = await this.config.functionToolCallbacks[functionName](
-    //           message.function_call.arguments,
-    //         );
-    //         return {
-    //           output: functionResult,
-    //           tokenUsage: getTokenUsage(data, cached),
-    //           cached,
-    //           logProbs,
-    //           cost: calculateCost(
-    //             this.modelName,
-    //             this.config,
-    //             data.usage?.prompt_tokens,
-    //             data.usage?.completion_tokens,
-    //           ),
-    //         };
-    //       }
-    //     }
-    //   }
+      //   const functionCalls = message.function_call ? [message.function_call] : message.tool_calls;
+      //   if (functionCalls && this.config.functionToolCallbacks) {
+      //     for (const functionCall of functionCalls) {
+      //       const functionName = functionCall.name;
+      //       if (this.config.functionToolCallbacks[functionName]) {
+      //         const functionResult = await this.config.functionToolCallbacks[functionName](
+      //           message.function_call.arguments,
+      //         );
+      //         return {
+      //           output: functionResult,
+      //           tokenUsage: getTokenUsage(data, cached),
+      //           cached,
+      //           logProbs,
+      //           cost: calculateCost(
+      //             this.modelName,
+      //             this.config,
+      //             data.usage?.prompt_tokens,
+      //             data.usage?.completion_tokens,
+      //           ),
+      //         };
+      //       }
+      //     }
+      //   }
 
       return {
         output,

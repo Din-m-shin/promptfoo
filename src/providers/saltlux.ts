@@ -147,8 +147,8 @@ export class SaltluxGenericProvider implements ApiProvider {
     }
     return (
       this.config.apiBaseUrl ||
-         this.env?.SALTLUX_API_BASE_URL ||
-         this.env?.SALTLUX_BASE_URL ||
+      this.env?.SALTLUX_API_BASE_URL ||
+      this.env?.SALTLUX_BASE_URL ||
       process.env.SALTLUX_API_BASE_URL ||
       process.env.SALTLUX_BASE_URL ||
       this.getApiUrlDefault()
@@ -162,7 +162,7 @@ export class SaltluxGenericProvider implements ApiProvider {
         ? process.env[this.config.apiKeyEnvar] ||
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
-         this.env?.SALTLUX_API_KEY ||
+      this.env?.SALTLUX_API_KEY ||
       process.env.SALTLUX_API_KEY
     );
   }
@@ -213,13 +213,17 @@ export class SaltluxChatCompletionProvider extends SaltluxGenericProvider {
       messages: messages,
       seed: this.config.seed || 0,
       stream: false,
-      max_tokens: this.config.max_tokens ?? parseInt(process.env.SALTLUX_MAX_TOKENS || '1024'),
-      temperature: this.config.temperature ?? parseFloat(process.env.SALTLUX_TEMPERATURE || '0'),
-      top_p: this.config.top_p ?? parseFloat(process.env.SALTLUX_TOP_P || '1'),
+      max_tokens:
+        this.config.max_tokens ?? Number.parseInt(process.env.SALTLUX_MAX_TOKENS || '1024'),
+      temperature:
+        this.config.temperature ?? Number.parseFloat(process.env.SALTLUX_TEMPERATURE || '0'),
+      top_p: this.config.top_p ?? Number.parseFloat(process.env.SALTLUX_TOP_P || '1'),
       presence_penalty:
-        this.config.presence_penalty ?? parseFloat(process.env.SALTLUX_PRESENCE_PENALTY || '0'),
+        this.config.presence_penalty ??
+        Number.parseFloat(process.env.SALTLUX_PRESENCE_PENALTY || '0'),
       frequency_penalty:
-        this.config.frequency_penalty ?? parseFloat(process.env.SALTLUX_FREQUENCY_PENALTY || '0'),
+        this.config.frequency_penalty ??
+        Number.parseFloat(process.env.SALTLUX_FREQUENCY_PENALTY || '0'),
       //   ...(this.config.functions
       //     ? { functions: renderVarsInObject(this.config.functions, context?.vars) }
       //     : {}),
@@ -263,10 +267,10 @@ export class SaltluxChatCompletionProvider extends SaltluxGenericProvider {
       };
     }
     try {
-    const calling_jaon = body;
-    const response_json = data;
-    //   const message = data.choices[0].message;
-    const message = data.message;
+      const calling_jaon = body;
+      const response_json = data;
+      //   const message = data.choices[0].message;
+      const message = data.message;
       let output = '';
       if (message.content && (message.function_call || message.tool_calls)) {
         output = message;
