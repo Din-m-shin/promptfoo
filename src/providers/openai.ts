@@ -129,6 +129,7 @@ type OpenAiCompletionOptions = OpenAiSharedOptions & {
   stop?: string[];
   seed?: number;
   passthrough?: object;
+  stream?: boolean;
 
   /**
    * If set, automatically call these functions when the assistant activates
@@ -471,6 +472,7 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
         this.config.max_tokens ?? Number.parseInt(process.env.OPENAI_MAX_TOKENS || '1024'),
       temperature:
         this.config.temperature ?? Number.parseFloat(process.env.OPENAI_TEMPERATURE || '0'),
+      stream: this.config.stream ?? false,
       top_p: this.config.top_p ?? Number.parseFloat(process.env.OPENAI_TOP_P || '1'),
       presence_penalty:
         this.config.presence_penalty ??
@@ -494,15 +496,26 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
       ...(callApiOptions?.includeLogProbs ? { logprobs: callApiOptions.includeLogProbs } : {}),
       ...(this.config.stop ? { stop: this.config.stop } : {}),
       ...(this.config.passthrough || {}),
+      ...(this.config.stream
+        ? {
+            stream_options: {
+              include_usage: true,
+            },
+          }
+        : {}),
     };
     //logger.debug(`Calling OpenAI API: ${JSON.stringify(body)}`);
 
-    let data,
-      cached = false;
-    try {
-      ({ data, cached } = (await fetchWithCache(
-        `${this.getApiUrl()}/chat/completions`,
-        {
+    if (this.config.stream) {
+      const cached = false;
+      let totalAnswer = '';
+      let totalResponse = '';
+      let firstTokenTime = 0; // 첫 토큰 수신 시간
+      let firstTokenReceived = false;
+      let streamStartTime: number | undefined;
+      try {
+        streamStartTime = Date.now();
+        const responseStream = await fetch(`${this.getApiUrl()}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -511,80 +524,168 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
             ...this.config.headers,
           },
           body: JSON.stringify(body),
-        },
-        REQUEST_TIMEOUT_MS,
-      )) as unknown as { data: any; cached: boolean });
-    } catch (err) {
-      return {
-        error: `API call error: ${String(err)}`,
-      };
-    }
+        });
 
-    //logger.debug(`\tOpenAI chat completions API response: ${JSON.stringify(data)}`);
-    if (data.error) {
-      return {
-        error: formatOpenAiError(data),
-      };
-    }
-    try {
-      const calling_jaon = body;
-      const response_json = data;
-      const message = data.choices[0].message;
-      let output = '';
-      if (message.content && (message.function_call || message.tool_calls)) {
-        output = message;
-      } else if (message.content === null) {
-        output = message.function_call || message.tool_calls;
-      } else {
-        output = message.content;
-      }
-      const logProbs = data.choices[0].logprobs?.content?.map(
-        (logProbObj: { token: string; logprob: number }) => logProbObj.logprob,
-      );
+        const reader = responseStream.body?.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
 
-      // Handle function tool callbacks
-      const functionCalls = message.function_call ? [message.function_call] : message.tool_calls;
-      if (functionCalls && this.config.functionToolCallbacks) {
-        for (const functionCall of functionCalls) {
-          const functionName = functionCall.name;
-          if (this.config.functionToolCallbacks[functionName]) {
-            const functionResult = await this.config.functionToolCallbacks[functionName](
-              message.function_call.arguments,
-            );
-            return {
-              output: functionResult,
-              tokenUsage: getTokenUsage(data, cached),
-              cached,
-              logProbs,
-              cost: calculateCost(
-                this.modelName,
-                this.config,
-                data.usage?.prompt_tokens,
-                data.usage?.completion_tokens,
-              ),
-            };
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const readResult = await reader?.read();
+          if (!readResult) {
+            break;
+          }
+          const { done, value } = readResult;
+          if (done) {
+            break;
+          }
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+
+          if (!firstTokenReceived && buffer.trim().length > 0) {
+            firstTokenTime = Date.now();
+            firstTokenReceived = true; // 첫 토큰 수신 확인
+          }
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.trim() === 'data: [DONE]') {
+              continue;
+            }
+
+            const jsonLine = line.startsWith('data: ') ? line.slice(6) : line;
+            if (jsonLine.trim()) {
+              const json = JSON.parse(jsonLine);
+              json.timestamp = Date.now();
+              const answer = json.choices[0]?.delta?.content;
+
+              if (answer) {
+                totalAnswer += answer;
+              }
+              totalResponse += JSON.stringify(json);
+            }
           }
         }
+      } catch (err) {
+        return {
+          error: `API call error: ${String(err)}`,
+        };
       }
 
-      return {
-        output,
-        tokenUsage: getTokenUsage(data, cached),
-        cached,
-        logProbs,
-        cost: calculateCost(
-          this.modelName,
-          this.config,
-          data.usage?.prompt_tokens,
-          data.usage?.completion_tokens,
-        ),
-        calling_jaon,
-        response_json,
-      };
-    } catch (err) {
-      return {
-        error: `API error: ${String(err)}: ${JSON.stringify(data)}`,
-      };
+      let timeToFirstToken;
+      if (streamStartTime) {
+        timeToFirstToken = (firstTokenTime - streamStartTime) / 1000; // 초 단위로 변환
+      }
+
+      try {
+        const calling_jaon = body;
+        const response_json = totalResponse;
+        const output = totalAnswer;
+        return {
+          output,
+          cached,
+          calling_jaon,
+          response_json,
+          timeToFirstToken,
+        };
+      } catch (err) {
+        return {
+          error: `API error: ${String(err)}}`,
+        };
+      }
+    } else {
+      let data,
+        cached = false;
+      try {
+        ({ data, cached } = (await fetchWithCache(
+          `${this.getApiUrl()}/chat/completions`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.getApiKey()}`,
+              ...(this.getOrganization() ? { 'OpenAI-Organization': this.getOrganization() } : {}),
+              ...this.config.headers,
+            },
+            body: JSON.stringify(body),
+          },
+          REQUEST_TIMEOUT_MS,
+        )) as unknown as { data: any; cached: boolean });
+      } catch (err) {
+        return {
+          error: `API call error: ${String(err)}`,
+        };
+      }
+
+      //logger.debug(`\tOpenAI chat completions API response: ${JSON.stringify(data)}`);
+      if (data.error) {
+        return {
+          error: formatOpenAiError(data),
+        };
+      }
+      try {
+        const calling_jaon = body;
+        const response_json = data;
+        const message = data.choices[0].message;
+        let output = '';
+        if (message.content && (message.function_call || message.tool_calls)) {
+          output = message;
+        } else if (message.content === null) {
+          output = message.function_call || message.tool_calls;
+        } else {
+          output = message.content;
+        }
+        const logProbs = data.choices[0].logprobs?.content?.map(
+          (logProbObj: { token: string; logprob: number }) => logProbObj.logprob,
+        );
+
+        // Handle function tool callbacks
+        const functionCalls = message.function_call ? [message.function_call] : message.tool_calls;
+        if (functionCalls && this.config.functionToolCallbacks) {
+          for (const functionCall of functionCalls) {
+            const functionName = functionCall.name;
+            if (this.config.functionToolCallbacks[functionName]) {
+              const functionResult = await this.config.functionToolCallbacks[functionName](
+                message.function_call.arguments,
+              );
+              return {
+                output: functionResult,
+                tokenUsage: getTokenUsage(data, cached),
+                cached,
+                logProbs,
+                cost: calculateCost(
+                  this.modelName,
+                  this.config,
+                  data.usage?.prompt_tokens,
+                  data.usage?.completion_tokens,
+                ),
+              };
+            }
+          }
+        }
+
+        return {
+          output,
+          tokenUsage: getTokenUsage(data, cached),
+          cached,
+          logProbs,
+          cost: calculateCost(
+            this.modelName,
+            this.config,
+            data.usage?.prompt_tokens,
+            data.usage?.completion_tokens,
+          ),
+          calling_jaon,
+          response_json,
+        };
+      } catch (err) {
+        return {
+          error: `API error: ${String(err)}: ${JSON.stringify(data)}`,
+        };
+      }
     }
   }
 }
