@@ -86,9 +86,9 @@ export const useStore = create<State>()(
                     return null;
                   }
                 })
-                .filter((prompt) => prompt !== null); 
+                .filter((prompt) => prompt !== null);
 
-              updates.prompts = updatedPrompts.map((prompt) => prompt.content);
+              updates.prompts = updatedPrompts.map((prompt) => prompt.content || '');
             }
           } else {
             console.warn('Invalid prompts config', config.prompts);
