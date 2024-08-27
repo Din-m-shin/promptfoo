@@ -7,7 +7,7 @@ export default function Logo() {
   return (
     <Link href="https://promptfoo.dev" passHref>
       <Box className="logo" component="a">
-        <Image width={25} height={25} src="/logo_polarisoffice.svg" alt="Promptfoo logo" />{' '}
+        <Image width={25} height={25} src="/logo_polarisoffice_full.svg" alt="Promptfoo logo" />{' '}
         <span>promptfoo</span>
       </Box>
     </Link>
