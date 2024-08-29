@@ -432,6 +432,7 @@ export const TestCaseSchema = z.object({
 
   // Key-value pairs to substitute in the prompt
   vars: VarsSchema.optional(),
+
   // Override the provider.
   provider: z.union([z.string(), ProviderOptionsSchema, ApiProviderSchema]).optional(),
 
