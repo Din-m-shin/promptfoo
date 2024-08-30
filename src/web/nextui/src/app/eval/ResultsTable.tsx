@@ -463,6 +463,15 @@ function ResultsTable({
                       <strong>Cost:</strong> ${prompt.metrics.cost.toPrecision(2)}
                     </div>
                   ) : null}
+                  {prompt.metrics?.totalTimeToFirstToken ? (
+                    <div>
+                      <strong>Avg TTFT:</strong>{' '}
+                      {Intl.NumberFormat(undefined, {
+                        maximumFractionDigits: 3,
+                      }).format(prompt.metrics.totalTimeToFirstToken / body.length)}{' '}
+                      ms
+                    </div>
+                  ) : null}
                 </div>
               ) : null;
 

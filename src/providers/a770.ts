@@ -1,9 +1,15 @@
 import { fetchWithCache } from '../cache';
 import logger from '../logger';
-import type { ApiProvider, CallApiContextParams, CallApiOptionsParams, EnvOverrides, ProviderResponse, TokenUsage } from '../types';
+import type {
+  ApiProvider,
+  CallApiContextParams,
+  CallApiOptionsParams,
+  EnvOverrides,
+  ProviderResponse,
+  TokenUsage,
+} from '../types';
 import { safeJsonStringify } from '../util/json';
 import { REQUEST_TIMEOUT_MS, parseChatPrompt } from './shared';
-
 
 interface ChatModel {
   id: string;
@@ -322,18 +328,24 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
     };
     logger.debug(`Calling A770 API: ${JSON.stringify(body)}`);
 
-    let data,
-      cached = false;
-
-    let totalAnswer = '';
-    let totalResponse = '';
-    let firstTokenTime = 0; // 첫 토큰 수신 시간
-    let firstTokenReceived = false;
-    let streamStartTime: number | undefined;
-
     if (this.config.stream) {
+      interface StreamMetrics {
+        avgLatencyMs: string;
+        avgTokens: string;
+        timeToFirstToken: string;
+      }
+
+      const cached = false;
+
+      let totalAnswer = '';
+      let totalResponse = '';
+      let totalTokens = 0;
+      let firstTokenTime = 0;
+      let firstTokenReceived = false;
+      let tokenEventsCount = 0;
+
+      const streamStartTime = Date.now();
       console.log('streaming');
-      streamStartTime = Date.now(); // 스트림 시작 시간 기록
       try {
         const responseStream = await fetch(`${this.getApiUrl()}/chat/completions`, {
           method: 'POST',
@@ -365,7 +377,7 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
 
           if (!firstTokenReceived && buffer.trim().length > 0) {
             firstTokenTime = Date.now();
-            firstTokenReceived = true; // 첫 토큰 수신 확인
+            firstTokenReceived = true;
           }
 
           const lines = buffer.split('\n');
@@ -379,16 +391,47 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
             const jsonLine = line.startsWith('data: ') ? line.slice(6) : line;
             if (jsonLine.trim()) {
               const json = JSON.parse(jsonLine);
-              json.timestamp = Date.now();
               const answer = json.choices[0]?.delta?.content;
-
               if (answer) {
                 totalAnswer += answer;
               }
+
+              if (json.choices.length === 0) {
+                totalTokens = json.usage.total_tokens;
+              }
+
+              tokenEventsCount++;
               totalResponse += JSON.stringify(json);
             }
           }
         }
+
+        const streamEndTime = Date.now();
+        const totalsteamlatencyMs = streamEndTime - streamStartTime;
+        const avgalatencyMs = totalsteamlatencyMs / tokenEventsCount;
+        const avgTokens = totalTokens / tokenEventsCount;
+
+        let timeToFirstToken = 0;
+        if (streamStartTime) {
+          timeToFirstToken = (firstTokenTime - streamStartTime) / 1000;
+        }
+
+        const streamMetrics: StreamMetrics = {
+          avgLatencyMs: avgalatencyMs.toFixed(3),
+          avgTokens: avgTokens.toFixed(3),
+          timeToFirstToken: timeToFirstToken.toFixed(3),
+        };
+
+        const calling_jaon = body;
+        const response_json = totalResponse;
+        const output = totalAnswer;
+        return {
+          output,
+          cached,
+          calling_jaon,
+          response_json,
+          streamMetrics,
+        };
       } catch (err) {
         return {
           error: `API call error: ${String(err)}`,
@@ -396,6 +439,9 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
       }
     } else {
       console.log('not streaming');
+
+      let data,
+        cached = false;
       try {
         ({ data, cached } = (await fetchWithCache(
           `${this.getApiUrl()}/chat/completions`,
@@ -416,39 +462,15 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
           error: `API call error: ${String(err)}`,
         };
       }
-    }
 
-    logger.debug(`\tA770 chat completions API response: ${JSON.stringify(data)}`);
-
-    if (this.config.stream) {
-      let timeToFirstToken;
-      if (streamStartTime) {
-        timeToFirstToken = (firstTokenTime - streamStartTime) / 1000; // 초 단위로 변환
-      }
-
-      try {
-        const calling_jaon = body;
-        const response_json = totalResponse;
-        const output = totalAnswer;
-        return {
-          output,
-          cached,
-          calling_jaon,
-          response_json,
-          timeToFirstToken,
-        };
-      } catch (err) {
-        return {
-          error: `API error: ${String(err)}: ${JSON.stringify(data)}`,
-        };
-      }
-    } else {
       if (data.error) {
         return {
           error: formatA770Error(data),
         };
       }
       try {
+        logger.debug(`\tA770 chat completions API response: ${JSON.stringify(data)}`);
+
         const calling_jaon = body;
         const response_json = data;
         const message = data.choices[0].message;

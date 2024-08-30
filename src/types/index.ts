@@ -157,6 +157,7 @@ export const CompletedPromptSchema = PromptSchema.extend({
       tokenUsage: TokenUsageSchema,
       namedScores: z.record(z.string(), z.number()),
       cost: z.number(),
+      totalTimeToFirstToken: z.number(),
     })
     .optional(),
 });
@@ -192,7 +193,7 @@ export interface EvaluateResult {
   metadata?: Record<string, any>;
   calling_jaon?: string;
   response_json?: string;
-  timeToFirstToken?: number;
+  streamMetrics?: any;
 }
 
 export interface EvaluateTableOutput {
@@ -209,7 +210,7 @@ export interface EvaluateTableOutput {
   metadata?: Record<string, any>;
   calling_jaon?: string;
   response_json?: string;
-  timeToFirstToken?: number;
+  streamMetrics?: any;
 }
 
 export interface EvaluateTableRow {
