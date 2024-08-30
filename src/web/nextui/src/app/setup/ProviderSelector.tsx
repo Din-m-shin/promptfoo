@@ -25,6 +25,7 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         function_call: undefined,
         functions: undefined,
         stop: undefined,
+        stream: false,
       },
     })),
   )
@@ -195,6 +196,7 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         top_k: 0,
         max_tokens: 1000,
         repetition_penalty: 0,
+        stream: false,
       },
     })),
   )
@@ -207,6 +209,7 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         top_k: 0,
         max_tokens: 1000,
         repetition_penalty: 0,
+        stream: false,
       },
     })),
   )
@@ -251,6 +254,7 @@ const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange
         provider.id = 'a6000:' + modelName;
       }
     } else if (provider.id && provider.id.startsWith('a770:')) {
+      // eslint-disable-next-line unicorn/no-lonely-if
       if (
         provider.id === 'a770:Enter-the-model-name-and-baseURL-in-API-keys-settings' ||
         provider.id === 'a770:a770 Model Name' ||
