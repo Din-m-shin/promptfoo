@@ -53,8 +53,11 @@ const ProviderConfigDialog: React.FC<ProviderConfigDialogProps> = ({
               handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
                 setLocalConfig({ ...localConfig, [key]: Number.parseFloat(e.target.value) });
             } else if (typeof value === 'boolean') {
-              handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-                setLocalConfig({ ...localConfig, [key]: e.target.value === 'true' });
+              handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const firstChar = e.target.value.trim().toLowerCase()[0];
+                const boolValue = firstChar === 't' ? true : firstChar === 'f' ? false : value;
+                setLocalConfig({ ...localConfig, [key]: boolValue });
+              };
             } else {
               handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                 const trimmed = e.target.value.trim();

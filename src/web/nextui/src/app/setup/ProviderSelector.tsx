@@ -25,7 +25,7 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         function_call: undefined,
         functions: undefined,
         stop: undefined,
-        stream: 'false',
+        stream: false,
       },
     })),
   )
@@ -196,7 +196,7 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         top_k: 0,
         max_tokens: 1000,
         repetition_penalty: 0,
-        stream: 'false',
+        stream: false,
       },
     })),
   )
@@ -209,7 +209,7 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
         top_k: 0,
         max_tokens: 1000,
         repetition_penalty: 0,
-        stream: 'false',
+        stream: false,
       },
     })),
   )
