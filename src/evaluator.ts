@@ -184,7 +184,7 @@ class Evaluator {
         cached: false,
         calling_jaon: '',
         response_json: '',
-        timeToFirstToken: 0,
+        streamMetrics: {},
       };
 
       if (test.providerOutput) {
@@ -320,10 +320,10 @@ class Evaluator {
 
       if (response.response_json) {
         ret.response_json = JSON.stringify(response.response_json);
-      } 
+      }
 
-      if (response.timeToFirstToken) {
-        ret.timeToFirstToken = response.timeToFirstToken;
+      if (response.streamMetrics) {
+        ret.streamMetrics = response.streamMetrics;
       }
 
       return ret;
@@ -418,6 +418,7 @@ class Evaluator {
             },
             namedScores: {},
             cost: 0,
+            totalTimeToFirstToken: 0,
           },
         };
         prompts.push(completedPrompt);
@@ -660,7 +661,7 @@ class Evaluator {
         metadata: row.metadata,
         calling_jaon: row.calling_jaon,
         response_json: row.response_json,
-        timeToFirstToken: row.timeToFirstToken,
+        streamMetrics: row.streamMetrics,
       };
 
       const metrics = table.head.prompts[colIndex].metrics;
@@ -706,6 +707,9 @@ class Evaluator {
       metrics.tokenUsage.total =
         (metrics.tokenUsage.total || 0) + (row.response?.tokenUsage?.total || 0);
       metrics.cost += row.cost || 0;
+      metrics.totalTimeToFirstToken =
+        (metrics.totalTimeToFirstToken || 0) +
+          Number.parseFloat(row.streamMetrics?.timeToFirstToken) || 0;
 
       await runExtensionHook(testSuite.extensions, 'afterEach', {
         test: evalStep.test,

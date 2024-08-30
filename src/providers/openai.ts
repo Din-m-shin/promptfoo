@@ -507,11 +507,19 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
     //logger.debug(`Calling OpenAI API: ${JSON.stringify(body)}`);
 
     if (this.config.stream) {
+      interface StreamMetrics {
+        avgLatencyMs: string;
+        avgTokens: string;
+        timeToFirstToken: string;
+      }
+
       const cached = false;
       let totalAnswer = '';
       let totalResponse = '';
-      let firstTokenTime = 0; // 첫 토큰 수신 시간
+      let firstTokenTime = 0;
       let firstTokenReceived = false;
+      let totalTokens = 0;
+      let tokenEventsCount = 0;
       let streamStartTime: number | undefined;
       try {
         streamStartTime = Date.now();
@@ -545,7 +553,7 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
 
           if (!firstTokenReceived && buffer.trim().length > 0) {
             firstTokenTime = Date.now();
-            firstTokenReceived = true; // 첫 토큰 수신 확인
+            firstTokenReceived = true;
           }
 
           const lines = buffer.split('\n');
@@ -565,6 +573,12 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
               if (answer) {
                 totalAnswer += answer;
               }
+
+              if (json.choices.length === 0) {
+                totalTokens = json.usage.total_tokens;
+              }
+
+              tokenEventsCount++;
               totalResponse += JSON.stringify(json);
             }
           }
@@ -575,10 +589,21 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
         };
       }
 
-      let timeToFirstToken;
+      const streamEndTime = Date.now();
+      const totalsteamlatencyMs = streamEndTime - streamStartTime;
+      const avgalatencyMs = totalsteamlatencyMs / tokenEventsCount;
+      const avgTokens = totalTokens / tokenEventsCount;
+
+      let timeToFirstToken = 0;
       if (streamStartTime) {
-        timeToFirstToken = (firstTokenTime - streamStartTime) / 1000; // 초 단위로 변환
+        timeToFirstToken = (firstTokenTime - streamStartTime) / 1000;
       }
+
+      const streamMetrics: StreamMetrics = {
+        avgLatencyMs: avgalatencyMs.toFixed(3),
+        avgTokens: avgTokens.toFixed(3),
+        timeToFirstToken: timeToFirstToken.toFixed(3),
+      };
 
       try {
         const calling_jaon = body;
@@ -589,7 +614,7 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
           cached,
           calling_jaon,
           response_json,
-          timeToFirstToken,
+          streamMetrics,
         };
       } catch (err) {
         return {

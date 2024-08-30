@@ -318,6 +318,19 @@ function EvalOutputCell({
           <strong>Cost:</strong> {costDisplay}
         </div>
       )}
+      {output.streamMetrics && (
+        <>
+          <div className="stat-item">
+            <strong>Avg Latency:</strong> {output.streamMetrics.avgLatencyMs} ms
+          </div>
+          <div className="stat-item">
+            <strong>Avg Tokens:</strong> {output.streamMetrics.avgTokens}
+          </div>
+          <div className="stat-item">
+            <strong>TTFT:</strong> {output.streamMetrics.timeToFirstToken} ms
+          </div>
+        </>
+      )}
     </div>
   ) : null;
 
@@ -359,7 +372,6 @@ function EvalOutputCell({
             metadata={output.metadata}
             calling_jaon={output.calling_jaon}
             response_json={output.response_json}
-            timeToFirstToken={output.timeToFirstToken}
           />
         </>
       )}
