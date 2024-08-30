@@ -254,7 +254,6 @@ const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange
         provider.id = 'a6000:' + modelName;
       }
     } else if (provider.id && provider.id.startsWith('a770:')) {
-      // eslint-disable-next-line unicorn/no-lonely-if
       if (
         provider.id === 'a770:Enter-the-model-name-and-baseURL-in-API-keys-settings' ||
         provider.id === 'a770:a770 Model Name' ||
