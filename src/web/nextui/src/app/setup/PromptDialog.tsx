@@ -10,7 +10,8 @@ import {
   Select,
   MenuItem,
   Typography,
-  TextareaAutosize
+  TextareaAutosize,
+  InputLabel,
 } from '@mui/material';
 
 interface PromptDialogProps {
@@ -116,8 +117,9 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
         <Select
           value={selectedFile}
           onChange={handleFileSelect}
-          placeholder="Select the JSON file uploaded to the server."
+          displayEmpty
           fullWidth
+          inputProps={{ 'aria-label': 'Without label' }}
         >
           <MenuItem value="">
             <em>Not selected.</em>
@@ -128,6 +130,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
             </MenuItem>
           ))}
         </Select>
+        <InputLabel>Select the JSON file uploaded to the server.</InputLabel>
         {fileContent && (
           <>
             <Typography variant="subtitle1" style={{ marginBottom: '1rem', marginTop: '1rem' }}>
