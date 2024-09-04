@@ -26,6 +26,7 @@ import {
   HuggingfaceTextGenerationProvider,
   HuggingfaceTokenExtractionProvider,
 } from './providers/huggingface';
+import { KonanChatCompletionProvider } from './providers/konan';
 import { LlamaProvider } from './providers/llama';
 import {
   LocalAiCompletionProvider,
@@ -393,16 +394,22 @@ export async function loadApiProvider(
     const modelName = splits[1] + ':' + splits[2]; // "luxiaon"과 "basic"을 연결
 
     ret = new SaltluxChatCompletionProvider(modelName, providerOptions);
+  } else if (providerPath.startsWith('konan:')) {
+    console.log('konan provider');
+    const splits = providerPath.split(':');
+    const modelName = splits[1];
+
+    ret = new KonanChatCompletionProvider(modelName, providerOptions);
   } else if (providerPath.startsWith('a6000:')) {
     console.log('a6000 provider');
-    const splits = providerPath.split(':');
+    // const splits = providerPath.split(':');
     const modelName = env?.A6000_MODEL_NAME || process.env.A6000_MODEL_NAME || 'a6000 Model Name';
     console.log('a6000 modelName ', modelName);
 
     ret = new A6000ChatCompletionProvider(modelName, providerOptions);
   } else if (providerPath.startsWith('a770:')) {
     console.log('a770 provider');
-    const splits = providerPath.split(':');
+    // const splits = providerPath.split(':');
     // const modelName = splits[1];
     const modelName = env?.A770_MODEL_NAME || process.env.A770_MODEL_NAME || 'a770 Model Name';
     console.log('a770 modelName ', modelName);
