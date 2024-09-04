@@ -24,7 +24,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
   const [editingPrompt, setEditingPrompt] = React.useState(prompt);
   const textFieldRef = React.useRef<HTMLInputElement>(null);
   const [jsonFiles, setJsonFiles] = React.useState([]);
-  const [selectedFile, setSelectedFile] = React.useState('');
+  const [selectedFile, setSelectedFile] = React.useState({ fullPath: '', fileName: '' });
   const [fileContent, setFileContent] = React.useState('');
 
   const fetchJsonFiles = async () => {
@@ -42,6 +42,16 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
     } catch (error) {
       console.error('Failed to fetch JSON files:', error);
     }
+  };
+
+  const getFileOptions = (files: string[]) => {
+    return files.map((file) => {
+      const parts = file.split('/');
+      return {
+        fullPath: file,
+        fileName: parts[parts.length - 1], // Gets the last part after the last '/'
+      };
+    });
   };
 
   const fetchFileContent = async (filePath: string) => {
@@ -64,7 +74,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
   React.useEffect(() => {
     if (open) {
       fetchJsonFiles();
-      setSelectedFile('');
+      setSelectedFile({ fullPath: '', fileName: '' });
       setEditingPrompt('');
       fetchFileContent('');
     }
@@ -82,18 +92,16 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
     }
   };
 
-  const handleFileSelect = (filePath: string) => {
-    setSelectedFile(filePath);
-    setEditingPrompt(filePath);
+  const handleFileSelect = (fileObject: any) => {
+    setSelectedFile(fileObject);
+    setEditingPrompt(fileObject.fullPath);
 
-    if (filePath === '') {
-      // Clearing out selections and content when 'None' is selected
-      setSelectedFile('');
+    if (fileObject.fullPath === '') {
+      setSelectedFile({ fullPath: '', fileName: '' });
       setEditingPrompt('');
       setFileContent('');
     } else {
-      // Fetch the content of the selected file
-      fetchFileContent(filePath);
+      fetchFileContent(fileObject.fullPath);
     }
   };
 
@@ -115,13 +123,15 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
           value={selectedFile}
           onChange={(event, newValue) => {
             if (newValue === null) {
-              handleFileSelect('');
+              handleFileSelect({ fullPath: '', fileName: '' });
             } else {
               handleFileSelect(newValue);
             }
-            console.log('Autocomplete newValue : ', newValue);
           }}
-          options={jsonFiles}
+          // options={getFileOptions(jsonFiles)}
+          options={getFileOptions(jsonFiles).sort((a, b) => -b.fileName.localeCompare(a.fileName))}
+          groupBy={(option) => option.fileName[0].toUpperCase()}
+          getOptionLabel={(option) => option.fileName}
           renderInput={(params) => (
             <TextField {...params} label="Select the JSON file uploaded to the server." />
           )}
