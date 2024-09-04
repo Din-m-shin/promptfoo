@@ -7,11 +7,9 @@ import {
   DialogActions,
   TextField,
   Button,
-  Select,
-  MenuItem,
   Typography,
   TextareaAutosize,
-  InputLabel,
+  Autocomplete,
 } from '@mui/material';
 
 interface PromptDialogProps {
@@ -84,8 +82,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
     }
   };
 
-  const handleFileSelect = (event: { target: { value: any } }) => {
-    const filePath = event.target.value;
+  const handleFileSelect = (filePath: string) => {
     setSelectedFile(filePath);
     setEditingPrompt(filePath);
 
@@ -114,23 +111,22 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
           helperText="Tip: use the {{varname}} syntax to add variables to your prompt."
           inputRef={textFieldRef}
         />
-        <Select
+        <Autocomplete
           value={selectedFile}
-          onChange={handleFileSelect}
-          displayEmpty
+          onChange={(event, newValue) => {
+            if (newValue === null) {
+              handleFileSelect('');
+            } else {
+              handleFileSelect(newValue);
+            }
+            console.log('Autocomplete newValue : ', newValue);
+          }}
+          options={jsonFiles}
+          renderInput={(params) => (
+            <TextField {...params} label="Select the JSON file uploaded to the server." />
+          )}
           fullWidth
-          inputProps={{ 'aria-label': 'Without label' }}
-        >
-          <MenuItem value="">
-            <em>Not selected.</em>
-          </MenuItem>
-          {jsonFiles.map((file, i) => (
-            <MenuItem key={i} value={file}>
-              {file}
-            </MenuItem>
-          ))}
-        </Select>
-        <InputLabel>Select the JSON file uploaded to the server.</InputLabel>
+        />
         {fileContent && (
           <>
             <Typography variant="subtitle1" style={{ marginBottom: '1rem', marginTop: '1rem' }}>
