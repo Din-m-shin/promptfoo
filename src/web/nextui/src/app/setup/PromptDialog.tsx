@@ -111,7 +111,13 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
       <DialogContent>
         <TextField
           value={editingPrompt}
-          onChange={(e) => setEditingPrompt(e.target.value)}
+          onChange={(e) => {
+            setEditingPrompt(e.target.value);
+            if (e.target.value !== selectedFile.fullPath) {
+              setSelectedFile({ fullPath: '', fileName: '' });
+              setFileContent('');
+            }
+          }}
           fullWidth
           margin="normal"
           multiline
