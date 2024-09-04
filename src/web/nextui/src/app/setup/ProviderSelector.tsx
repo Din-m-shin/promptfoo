@@ -213,6 +213,19 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
       },
     })),
   )
+  .concat(
+    ['konan:Konan-LLM-ENT-20'].map((id) => ({
+      id,
+      config: {
+        temperature: 1,
+        top_p: 0.1,
+        top_k: 0,
+        max_tokens: 1000,
+        repetition_penalty: 0,
+        stream: false,
+      },
+    })),
+  )
   .sort((a, b) => a.id.localeCompare(b.id));
 
 const PREFIX_TO_PROVIDER: Record<string, string> = {

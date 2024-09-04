@@ -137,7 +137,7 @@ export type EnvOverrides = {
   VERTEX_PUBLISHER?: string;
   MISTRAL_API_KEY?: string;
   CLOUDFLARE_API_KEY?: string;
-  CLOUDFLARE_ACCOUNT_ID?: string;  
+  CLOUDFLARE_ACCOUNT_ID?: string;
   SALTLUX_API_KEY?: string;
   UPSTAGE_API_HOST?: string;
   UPSTAGE_API_BASE_URL?: string;
@@ -153,6 +153,10 @@ export type EnvOverrides = {
   A770_API_BASE_URL?: string;
   A770_BASE_URL?: string;
   A770_MODEL_NAME?: string;
+  KONAN_API_HOST?: string;
+  KONAN_API_BASE_URL?: string;
+  KONAN_BASE_URL?: string;
+  KONAN_MODEL_NAME?: string;
 };
 
 export type FilePath = string;
