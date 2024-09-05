@@ -217,7 +217,7 @@ const defaultProviders: ProviderOptions[] = ([] as (ProviderOptions & { id: stri
     ['konan:Konan-LLM-ENT-20'].map((id) => ({
       id,
       config: {
-        temperature: 1,
+        temperature: 0.5,
         top_p: 0.1,
         top_k: 0,
         max_tokens: 1000,
