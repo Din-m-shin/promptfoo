@@ -44,6 +44,7 @@ async function evaluate(testSuite: EvaluateTestSuite, options: EvaluateOptions =
             return {
               raw: promptInput.toString(),
               label: promptInput.toString(),
+              nickname: promptInput.toString(),
               function: promptInput as PromptFunction,
             };
           } else if (typeof promptInput === 'string') {
@@ -51,11 +52,13 @@ async function evaluate(testSuite: EvaluateTestSuite, options: EvaluateOptions =
             return prompts.map((p) => ({
               raw: p.raw,
               label: p.label,
+              nickname: p.nickname,
             }));
           } else {
             return {
               raw: JSON.stringify(promptInput),
               label: JSON.stringify(promptInput),
+              nickname: JSON.stringify(promptInput),
             };
           }
         }),

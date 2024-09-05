@@ -740,6 +740,7 @@ describe('call provider apis', () => {
         prompt: {
           label: 'Test prompt',
           raw: 'Test prompt',
+          nickname: 'Test prompt',
         },
         vars: {
           var1: 'value 1',

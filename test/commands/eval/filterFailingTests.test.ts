@@ -39,7 +39,7 @@ describe('filterFailingTests', () => {
         ],
         table: {} as any,
         stats: {} as any,
-      } as EvaluateSummary,
+      } as unknown as EvaluateSummary,
     } as any);
   });
 
@@ -76,6 +76,7 @@ describe('filterFailingTests', () => {
             prompt: {
               raw: 'prompt',
               label: 'prompt',
+              nickname: 'prompt',
             },
             score: 0.5,
             latencyMs: 1000,

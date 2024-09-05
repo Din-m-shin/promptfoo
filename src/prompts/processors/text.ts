@@ -17,6 +17,7 @@ export function processTxtFile(filePath: string, { label }: Partial<Prompt>): Pr
     .map((prompt) => ({
       raw: prompt,
       label: label ? `${label}: ${filePath}: ${prompt}` : `${filePath}: ${prompt}`,
+      nickname: prompt,
       // no config
     }));
 }

@@ -169,6 +169,7 @@ class Evaluator {
         raw: renderedPrompt,
         label: promptLabel,
         config: prompt.config,
+        nickname: prompt.nickname,
       },
       vars,
     };
@@ -372,7 +373,7 @@ class Evaluator {
             async (answer) => {
               rl.close();
               if (answer.toLowerCase().startsWith('y')) {
-                testSuite.prompts.push({ raw: prompt, label: prompt });
+                testSuite.prompts.push({ raw: prompt, label: prompt, nickname: prompt });
                 numAdded++;
               } else {
                 logger.info('Skipping this prompt.');

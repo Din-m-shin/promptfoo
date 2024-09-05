@@ -465,8 +465,8 @@ describe('readProviderPromptMap', () => {
 
   beforeEach(() => {
     parsedPrompts = [
-      { label: 'prompt1', raw: 'prompt1' },
-      { label: 'prompt2', raw: 'prompt2' },
+      { label: 'prompt1', raw: 'prompt1', nickname: 'prompt1' },
+      { label: 'prompt2', raw: 'prompt2', nickname: 'prompt2' },
     ];
   });
 

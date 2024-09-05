@@ -146,6 +146,51 @@
                             },
                             "CLOUDFLARE_ACCOUNT_ID": {
                               "type": "string"
+                            },
+                            "SALTLUX_API_KEY": {
+                              "type": "string"
+                            },
+                            "UPSTAGE_API_HOST": {
+                              "type": "string"
+                            },
+                            "UPSTAGE_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "UPSTAGE_BASE_URL": {
+                              "type": "string"
+                            },
+                            "SALTLUX_API_HOST": {
+                              "type": "string"
+                            },
+                            "SALTLUX_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "SALTLUX_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A6000_API_HOST": {
+                              "type": "string"
+                            },
+                            "A6000_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A6000_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A6000_MODEL_NAME": {
+                              "type": "string"
+                            },
+                            "A770_API_HOST": {
+                              "type": "string"
+                            },
+                            "A770_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A770_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A770_MODEL_NAME": {
+                              "type": "string"
                             }
                           },
                           "additionalProperties": false
@@ -210,11 +255,15 @@
                       "label": {
                         "type": "string"
                       },
+                      "nickname": {
+                        "type": "string"
+                      },
                       "config": {}
                     },
                     "required": [
                       "raw",
-                      "label"
+                      "label",
+                      "nickname"
                     ],
                     "additionalProperties": false
                   }

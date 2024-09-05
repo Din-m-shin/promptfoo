@@ -90,6 +90,7 @@ export function processPythonFile(
       function: functionName
         ? (context) => pythonPromptFunction(filePath, functionName, context)
         : (context) => pythonPromptFunctionLegacy(filePath, context),
+      nickname: prompt.nickname ?? label,
       config: prompt.config,
     },
   ];

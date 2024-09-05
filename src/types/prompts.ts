@@ -28,6 +28,7 @@ export type Prompt = {
   raw: string;
   display?: string;
   label: string;
+  nickname: string;
   function?: PromptFunction;
 
   // These config options are merged into the provider config.

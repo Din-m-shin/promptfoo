@@ -58,7 +58,7 @@ const mockGradingApiProviderFails: ApiProvider = {
 };
 
 function toPrompt(text: string): Prompt {
-  return { raw: text, label: text };
+  return { raw: text, label: text, nickname: text };
 }
 
 describe('evaluator', () => {
@@ -139,7 +139,13 @@ describe('evaluator', () => {
   it('evaluate with named prompt', async () => {
     const testSuite: TestSuite = {
       providers: [mockApiProvider],
-      prompts: [{ raw: 'Test prompt {{ var1 }} {{ var2 }}', label: 'test display name' }],
+      prompts: [
+        {
+          raw: 'Test prompt {{ var1 }} {{ var2 }}',
+          label: 'test display name',
+          nickname: 'test-nickname',
+        },
+      ],
       tests: [
         {
           vars: { var1: 'value1', var2: 'value2' },
@@ -601,9 +607,9 @@ describe('evaluator', () => {
     const testSuite: TestSuite = {
       providers: [mockApiProvider],
       prompts: [
-        { raw: 'Test prompt 1', label: 'prompt1' },
-        { raw: 'Test prompt 2', label: 'prompt2' },
-        { raw: 'Test prompt 3', label: 'group1:prompt3' },
+        { raw: 'Test prompt 1', label: 'prompt1', nickname: 'prompt1' },
+        { raw: 'Test prompt 2', label: 'prompt2', nickname: 'prompt2' },
+        { raw: 'Test prompt 3', label: 'group1:prompt3', nickname: 'group1:prompt3' },
       ],
       providerPromptMap: {
         'test-provider': ['prompt1', 'group1'],
@@ -908,10 +914,12 @@ describe('evaluator', () => {
         {
           raw: 'Prompt 1',
           label: 'prompt1',
+          nickname: 'prompt1',
         },
         {
           raw: 'Prompt 2',
           label: 'prompt2',
+          nickname: 'prompt2',
         },
       ],
       providerPromptMap: {
@@ -1179,6 +1187,7 @@ describe('evaluator', () => {
         {
           raw: 'You are a helpful math tutor. Solve {{problem}}',
           label: 'Math problem',
+          nickname: 'math-problem',
           config: {
             response_format: {
               type: 'json_schema',
@@ -1372,14 +1381,17 @@ describe('isAllowedPrompt', () => {
   const prompt1: Prompt = {
     label: 'prompt1',
     raw: '',
+    nickname: 'prompt1',
   };
   const prompt2: Prompt = {
     label: 'group1:prompt2',
     raw: '',
+    nickname: 'group1:prompt2',
   };
   const prompt3: Prompt = {
     label: 'group2:prompt3',
     raw: '',
+    nickname: 'group2:prompt3',
   };
 
   it('should return true if allowedPrompts is undefined', () => {

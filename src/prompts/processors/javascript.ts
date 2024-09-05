@@ -29,6 +29,7 @@ export async function processJsFile(
     {
       raw: String(promptFunction),
       label: prompt.label ? prompt.label : functionName ? `${filePath}:${functionName}` : filePath,
+      nickname: prompt.nickname ? prompt.nickname : functionName ? functionName : filePath,
       function: (context) => promptFunction(transformContext(context)),
       config: prompt.config,
     },

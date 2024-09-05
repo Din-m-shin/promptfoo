@@ -34,7 +34,7 @@ jest.mock('../src/util/transform', () => ({
 }));
 
 function toPrompt(text: string): Prompt {
-  return { raw: text, label: text };
+  return { raw: text, label: text, nickname: text };
 }
 
 describe('renderPrompt', () => {

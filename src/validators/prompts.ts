@@ -26,6 +26,7 @@ export const PromptSchema = z.object({
    */
   display: z.string().optional(),
   label: z.string(),
+  nickname: z.string(),
   function: PromptFunctionSchema.optional(),
 
   // These config options are merged into the provider config.

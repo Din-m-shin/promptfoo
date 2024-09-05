@@ -12,6 +12,7 @@ export const prompts = sqliteTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
     prompt: text('prompt').notNull(),
+    nickname: text('nickname'),
   },
   (table) => ({
     createdAtIdx: index('prompts_created_at_idx').on(table.createdAt),
