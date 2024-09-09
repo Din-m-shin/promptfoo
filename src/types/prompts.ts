@@ -5,6 +5,11 @@ declare class ApiProvider {
   label?: string;
 }
 
+export interface PromptLabel {
+  prompt?: string;
+  label?: string;
+}
+
 export type PromptConfig = {
   prefix?: string;
   suffix?: string;

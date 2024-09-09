@@ -16,6 +16,7 @@ export interface State {
   description: string;
   providers: ProviderOptions[];
   prompts: string[];
+  promptLabels: string[];
   defaultTest: TestCase;
   evaluateOptions: EvaluateOptions;
   scenarios: Scenario[];
@@ -24,6 +25,7 @@ export interface State {
   setDescription: (description: string) => void;
   setProviders: (providers: ProviderOptions[]) => void;
   setPrompts: (prompts: string[]) => void;
+  setPromptLabels: (promptLabels: string[]) => void;
   setDefaultTest: (testCase: TestCase) => void;
   setEvaluateOptions: (options: EvaluateOptions) => void;
   setScenarios: (scenarios: Scenario[]) => void;
@@ -39,6 +41,7 @@ export const useStore = create<State>()(
       description: '',
       providers: [],
       prompts: [],
+      promptLabels: [],
       defaultTest: {},
       evaluateOptions: {},
       scenarios: [],
@@ -47,6 +50,7 @@ export const useStore = create<State>()(
       setDescription: (description) => set({ description }),
       setProviders: (providers) => set({ providers }),
       setPrompts: (prompts) => set({ prompts }),
+      setPromptLabels: (promptLabels) => set({ promptLabels }),
       setDefaultTest: (testCase) => set({ defaultTest: testCase }),
       setEvaluateOptions: (options) => set({ evaluateOptions: options }),
       setScenarios: (scenarios) => set({ scenarios }),
@@ -106,12 +110,13 @@ export const useStore = create<State>()(
         set(updates);
       },
       getTestSuite: () => {
-        const { description, testCases, providers, prompts, env, scenarios } = get();
+        const { description, testCases, providers, prompts, promptLabels, env, scenarios } = get();
         return {
           env,
           description,
           providers,
           prompts,
+          promptLabels,
           tests: testCases,
           scenarios,
         };

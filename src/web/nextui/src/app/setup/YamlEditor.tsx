@@ -29,6 +29,8 @@ const YamlEditorComponent: React.FC = () => {
     setEvaluateOptions,
     prompts,
     setPrompts,
+    promptLabels,
+    setPromptLabels,
     providers,
     setProviders,
     scenarios,
@@ -63,6 +65,7 @@ const YamlEditorComponent: React.FC = () => {
 
     setEvaluateOptions(yamlObj.evaluateOptions || {});
     setPrompts(yamlObj.prompts || []);
+    setPromptLabels(yamlObj.promptLabels || []);
     setProviders(yamlObj.providers || []);
     setScenarios(yamlObj.scenarios || []);
     setTestCases(yamlObj.tests || []);
@@ -104,14 +107,19 @@ const YamlEditorComponent: React.FC = () => {
       description,
       env,
       evaluateOptions,
-      prompts,
+      //prompts,
+      // promptLabels,
+      promptsWithLabels: prompts.map((prompt, index) => ({
+        prompt,
+        label: promptLabels[index],
+      })),
       providers,
       scenarios,
       tests: testCases,
     };
 
     setCode(yaml.dump(testSuite));
-  }, [defaultTest, description, env, evaluateOptions, prompts, providers, scenarios, testCases]);
+  }, [defaultTest, description, env, evaluateOptions, prompts, promptLabels, providers, scenarios, testCases]);
 
   return (
     <Box mt={4}>

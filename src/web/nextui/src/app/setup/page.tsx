@@ -25,6 +25,7 @@ import './page.css';
 export type WebTestSuiteConfig = TestSuiteConfig & {
   providers: ProviderOptions[];
   prompts: string[];
+  promptLabels: string[];
   tests: TestCase[];
 };
 
@@ -47,7 +48,16 @@ function ErrorFallback({
 const EvaluateTestSuiteCreator: React.FC = () => {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
-  const { setDescription, providers, setProviders, prompts, setPrompts, setTestCases } = useStore();
+  const {
+    setDescription,
+    providers,
+    setProviders,
+    prompts,
+    setPrompts,
+    promptLabels,
+    setPromptLabels,
+    setTestCases,
+  } = useStore();
 
   useEffect(() => {
     useStore.persist.rehydrate();
@@ -77,6 +87,7 @@ const EvaluateTestSuiteCreator: React.FC = () => {
     setDescription('');
     setProviders([]);
     setPrompts([]);
+    setPromptLabels([]);
     setTestCases([]);
     setResetDialogOpen(false);
   };
@@ -116,7 +127,11 @@ const EvaluateTestSuiteCreator: React.FC = () => {
         >
           <Stack direction="column" spacing={2} justifyContent="space-between">
             <Typography variant="h5">Providers</Typography>
-            <ProviderSelector providers={providers} onChange={setProviders} />
+            <ProviderSelector
+              providers={providers}
+              onChange={setProviders}
+              promptLabels={promptLabels}
+            />
           </Stack>
         </ErrorBoundary>
       </Box>

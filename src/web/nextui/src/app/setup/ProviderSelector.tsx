@@ -247,9 +247,10 @@ function getGroupName(label?: string) {
 interface ProviderSelectorProps {
   providers: ProviderOptions[];
   onChange: (providers: ProviderOptions[]) => void;
+  promptLabels: string[];
 }
 
-const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange }) => {
+const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange, promptLabels}) => {
   const [selectedProvider, setSelectedProvider] = React.useState<ProviderOptions | null>(null);
 
   const getProviderLabel = (provider: string | ProviderOptions): string => {
@@ -376,6 +377,7 @@ const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange
           config={selectedProvider.config}
           onClose={() => setSelectedProvider(null)}
           onSave={handleSave}
+          promptLabels={promptLabels}
         />
       )}
     </Box>

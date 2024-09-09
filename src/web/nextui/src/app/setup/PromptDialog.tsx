@@ -16,16 +16,20 @@ interface PromptDialogProps {
   open: boolean;
   prompt: string;
   index: number;
-  onAdd: (prompt: string) => void;
+  label: string;
+  promptLabels: string[];
+  onAdd: (prompt: string, label: string) => void;
   onCancel: () => void;
 }
 
-const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd, onCancel }) => {
+const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, label, index, promptLabels, onAdd, onCancel }) => {
   const [editingPrompt, setEditingPrompt] = React.useState(prompt);
   const textFieldRef = React.useRef<HTMLInputElement>(null);
   const [jsonFiles, setJsonFiles] = React.useState([]);
   const [selectedFile, setSelectedFile] = React.useState({ fullPath: '', fileName: '' });
   const [fileContent, setFileContent] = React.useState('');
+  const [promptlabel, setPromptLabel] = React.useState(label);
+  const [labelError, setLabelError] = React.useState('');
 
   const fetchJsonFiles = async () => {
     try {
@@ -80,15 +84,20 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
     }
 
     setEditingPrompt(prompt);
+    setPromptLabel(label);
+    setLabelError('');
   }, [prompt, open]);
 
   const handleAdd = (close: boolean) => {
-    onAdd(editingPrompt);
-    setEditingPrompt('');
-    if (close) {
-      onCancel();
-    } else if (textFieldRef.current) {
-      textFieldRef.current.focus();
+    if (!labelError) {
+      onAdd(editingPrompt, promptlabel);
+      setEditingPrompt('');
+      setPromptLabel('');
+      if (close) {
+        onCancel();
+      } else if (textFieldRef.current) {
+        textFieldRef.current.focus();
+      }
     }
   };
 
@@ -103,6 +112,16 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
     } else {
       fetchFileContent(fileObject.fullPath);
     }
+  };
+
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newLabel = e.target.value;
+    const isDuplicate =
+      newLabel !== '' &&
+      newLabel !== label &&
+      promptLabels.filter((l) => l !== '' && l !== label).includes(newLabel);
+    setPromptLabel(newLabel);
+    setLabelError(isDuplicate ? 'This label already exists. Please use a different label.' : '');
   };
 
   return (
@@ -163,13 +182,22 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
             />
           </>
         )}
+        <TextField
+          label="Label"
+          value={promptlabel}
+          onChange={handleLabelChange}
+          error={!!labelError}
+          helperText={labelError || 'Enter a unique label for the prompt'}
+          fullWidth
+          margin="normal"
+        />
       </DialogContent>
       <DialogActions>
         <Button
           onClick={handleAdd.bind(null, true)}
           color="primary"
           variant="contained"
-          disabled={!editingPrompt.length}
+          disabled={!editingPrompt.length || !!labelError}
         >
           Add
         </Button>
@@ -177,7 +205,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
           onClick={handleAdd.bind(null, false)}
           color="primary"
           variant="contained"
-          disabled={!editingPrompt.length}
+          disabled={!editingPrompt.length || !!labelError}
         >
           Add Another
         </Button>

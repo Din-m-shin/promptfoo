@@ -25,6 +25,8 @@ const PromptsSection: React.FC = () => {
   const { prompts, setPrompts } = useStore();
   const newPromptInputRef = useRef<HTMLInputElement>(null);
 
+  const { promptLabels, setPromptLabels } = useStore();
+
   useEffect(() => {
     if (editingPromptIndex !== null && editingPromptIndex > 0 && newPromptInputRef.current) {
       newPromptInputRef.current.focus();
@@ -92,6 +94,11 @@ const PromptsSection: React.FC = () => {
 
   const handleDuplicatePrompt = (event: React.MouseEvent, index: number) => {
     event.stopPropagation();
+
+    const originalLabel = promptLabels[index];
+    const isLabelDuplicate = promptLabels.includes(originalLabel);
+    setPromptLabels([...promptLabels, isLabelDuplicate ? '' : originalLabel]);
+
     const duplicatedPrompt = prompts[index];
     setPrompts([...prompts, duplicatedPrompt]);
   };
@@ -100,11 +107,16 @@ const PromptsSection: React.FC = () => {
     setPrompts(prompts.map((p, i) => (i === index ? newPrompt : p)));
   };
 
+  const handleChangePromptLabel = (index: number, newPromptLabel: string) => {
+    setPromptLabels(promptLabels.map((p, i) => (i === index ? newPromptLabel : p)));
+  };
+
   const handleRemovePrompt = (event: React.MouseEvent, indexToRemove: number) => {
     event.stopPropagation();
 
     if (confirm('Are you sure you want to remove this prompt?')) {
       setPrompts(prompts.filter((_, index) => index !== indexToRemove));
+      setPromptLabels(promptLabels.filter((_, index) => index !== indexToRemove));
     }
   };
 
@@ -200,12 +212,17 @@ const PromptsSection: React.FC = () => {
       <PromptDialog
         open={promptDialogOpen}
         prompt={editingPromptIndex === null ? '' : prompts[editingPromptIndex]}
+        label={editingPromptIndex === null ? '' : promptLabels[editingPromptIndex]}
+        promptLabels={promptLabels}
         index={editingPromptIndex === null ? 0 : editingPromptIndex}
-        onAdd={(newPrompt) => {
+        onAdd={(newPrompt, newLabel) => {
           if (editingPromptIndex === null) {
             setPrompts([...prompts, newPrompt]);
+            console.log('newLabel', newLabel);
+            setPromptLabels([...promptLabels, newLabel]);
           } else {
             handleChangePrompt(editingPromptIndex, newPrompt);
+            handleChangePromptLabel(editingPromptIndex, newLabel);
           }
           setEditingPromptIndex(null);
         }}
