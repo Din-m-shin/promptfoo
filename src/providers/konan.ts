@@ -168,7 +168,7 @@ export class KonanGenericProvider implements ApiProvider {
         ? process.env[this.config.apiKeyEnvar] ||
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
-      //   this.env?.KONAN_API_KEY ||
+      this.env?.KONAN_API_KEY ||
       process.env.KONAN_API_KEY
     );
   }

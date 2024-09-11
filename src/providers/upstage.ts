@@ -1,9 +1,15 @@
 import { fetchWithCache } from '../cache';
 import logger from '../logger';
-import type { ApiProvider, CallApiContextParams, CallApiOptionsParams, EnvOverrides, ProviderResponse, TokenUsage } from '../types';
+import type {
+  ApiProvider,
+  CallApiContextParams,
+  CallApiOptionsParams,
+  EnvOverrides,
+  ProviderResponse,
+  TokenUsage,
+} from '../types';
 import { safeJsonStringify } from '../util/json';
 import { REQUEST_TIMEOUT_MS, parseChatPrompt } from './shared';
-
 
 const UPSTAGE_CHAT_MODELS = [
   ...['solar'].map((model) => ({
@@ -50,8 +56,6 @@ type UpstageCompletionOptions = UpstageAiSharedOptions & {
   //     (arg: string) => Promise<string>
   //   >;
 };
-
-
 
 function formatUpstageError(data: {
   error: { message: string; type?: string; code?: string };
@@ -164,7 +168,7 @@ export class UpstageGenericProvider implements ApiProvider {
         ? process.env[this.config.apiKeyEnvar] ||
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
-      //   this.env?.Upstage_API_KEY ||
+      this.env?.UPSTAGE_API_KEY ||
       process.env.UPSTAGE_API_KEY
     );
   }
@@ -202,7 +206,6 @@ export class UpstageChatCompletionProvider extends UpstageGenericProvider {
     context?: CallApiContextParams,
     callApiOptions?: CallApiOptionsParams,
   ): Promise<ProviderResponse> {
-
     // solar not use api key
     // if (!this.getApiKey()) {
     //   throw new Error(

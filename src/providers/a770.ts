@@ -247,7 +247,7 @@ export class A770GenericProvider implements ApiProvider {
         ? process.env[this.config.apiKeyEnvar] ||
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
-      //   this.env?.A770_API_KEY ||
+      this.env?.A770_API_KEY ||
       process.env.A770_API_KEY
     );
   }

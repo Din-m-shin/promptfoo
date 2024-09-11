@@ -151,6 +151,13 @@ const ConfigureEnvButton: React.FC = () => {
                 value={env.UPSTAGE_BASE_URL}
                 onChange={(e) => setEnv({ ...env, UPSTAGE_BASE_URL: e.target.value })}
               />
+              <TextField
+                label="Upstage API key"
+                fullWidth
+                margin="normal"
+                value={env.UPSTAGE_API_KEY}
+                onChange={(e) => setEnv({ ...env, A6000_API_KEY: e.target.value })}
+              />
             </AccordionDetails>
           </Accordion>
           <Accordion>
@@ -180,7 +187,7 @@ const ConfigureEnvButton: React.FC = () => {
                 label="A6000 Base Url"
                 fullWidth
                 margin="normal"
-                defaultValue="http://192.168.17.95:1234/v1"
+                defaultValue="http://192.168.17.95:18080/v1"
                 value={env.A6000_BASE_URL}
                 onChange={(e) => setEnv({ ...env, A6000_BASE_URL: e.target.value })}
               />
@@ -193,6 +200,13 @@ const ConfigureEnvButton: React.FC = () => {
                   setEnv({ ...env, A6000_MODEL_NAME: e.target.value });
                   process.env.A6000_MODEL_NAME = e.target.value;
                 }}
+              />
+              <TextField
+                label="A6000 API key"
+                fullWidth
+                margin="normal"
+                value={env.A6000_API_KEY}
+                onChange={(e) => setEnv({ ...env, A6000_API_KEY: e.target.value })}
               />
             </AccordionDetails>
           </Accordion>
@@ -216,6 +230,43 @@ const ConfigureEnvButton: React.FC = () => {
                   setEnv({ ...env, A770_MODEL_NAME: e.target.value });
                   process.env.A770_MODEL_NAME = e.target.value;
                 }}
+              />
+              <TextField
+                label="A770 API key"
+                fullWidth
+                margin="normal"
+                value={env.A770_API_KEY}
+                onChange={(e) => setEnv({ ...env, A770_API_KEY: e.target.value })}
+              />
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary>Konan</AccordionSummary>
+            <AccordionDetails>
+              <TextField
+                label="Konan Base Url"
+                fullWidth
+                margin="normal"
+                defaultValue="https://konanllm.konantech.com/v3"
+                value={env.KONAN_BASE_URL}
+                onChange={(e) => setEnv({ ...env, KONAN_BASE_URL: e.target.value })}
+              />
+              <TextField
+                label="Konan Model Name"
+                fullWidth
+                margin="normal"
+                value={env.KONAN_MODEL_NAME}
+                onChange={(e) => {
+                  setEnv({ ...env, KONAN_MODEL_NAME: e.target.value });
+                  process.env.KONAN_MODEL_NAME = e.target.value;
+                }}
+              />
+              <TextField
+                label="Konan API key"
+                fullWidth
+                margin="normal"
+                value={env.KONAN_API_KEY}
+                onChange={(e) => setEnv({ ...env, KONAN_API_KEY: e.target.value })}
               />
             </AccordionDetails>
           </Accordion>

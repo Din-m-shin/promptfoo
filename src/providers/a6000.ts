@@ -217,7 +217,7 @@ export class A6000GenericProvider implements ApiProvider {
   }
 
   getApiUrlDefault(): string {
-    return 'http://192.168.17.95:1234/v1';
+    return 'http://192.168.17.95:18080/v1';
   }
 
   getApiUrl(): string {
@@ -242,7 +242,7 @@ export class A6000GenericProvider implements ApiProvider {
         ? process.env[this.config.apiKeyEnvar] ||
           this.env?.[this.config.apiKeyEnvar as keyof EnvOverrides]
         : undefined) ||
-      //   this.env?.META_LLAMA_API_KEY ||
+      this.env?.A6000_API_KEY ||
       process.env.A6000_API_KEY
     );
   }
