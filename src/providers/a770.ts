@@ -339,10 +339,12 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
 
       let totalAnswer = '';
       let totalResponse = '';
-      let totalTokens = 0;
       let firstTokenTime = 0;
       let firstTokenReceived = false;
       let tokenEventsCount = 0;
+      let completion_tokens = 0;
+      let prompt_tokens = 0;
+      let total_tokens = 0;
 
       const streamStartTime = Date.now();
       console.log('streaming');
@@ -397,7 +399,9 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
               }
 
               if (json.choices.length === 0) {
-                totalTokens = json.usage.total_tokens;
+                total_tokens = json.usage.total_tokens;
+                prompt_tokens = json.usage.prompt_tokens;
+                completion_tokens = json.usage.completion_tokens;
               }
 
               tokenEventsCount++;
@@ -409,7 +413,7 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
         const streamEndTime = Date.now();
         const totalsteamlatencyMs = streamEndTime - streamStartTime;
         const avgalatencyMs = totalsteamlatencyMs / tokenEventsCount;
-        const avgTokens = totalTokens / tokenEventsCount;
+        const avgTokens = total_tokens / tokenEventsCount;
 
         let timeToFirstToken = 0;
         if (streamStartTime) {
@@ -427,6 +431,7 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
         const output = totalAnswer;
         return {
           output,
+          tokenUsage: { total: total_tokens, prompt: prompt_tokens, completion: completion_tokens },
           cached,
           calling_jaon,
           response_json,
