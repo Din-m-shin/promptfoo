@@ -143,7 +143,6 @@ export type OpenAiCompletionOptions = OpenAiSharedOptions & {
   stop?: string[];
   seed?: number;
   passthrough?: object;
-  stream?: boolean;
 
   /**
    * If set, automatically call these functions when the assistant activates
@@ -486,7 +485,6 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
         this.config.max_tokens ?? Number.parseInt(process.env.OPENAI_MAX_TOKENS || '1024'),
       temperature:
         this.config.temperature ?? Number.parseFloat(process.env.OPENAI_TEMPERATURE || '0'),
-      stream: this.config.stream ?? false,
       top_p: this.config.top_p ?? Number.parseFloat(process.env.OPENAI_TOP_P || '1'),
       presence_penalty:
         this.config.presence_penalty ??
@@ -510,37 +508,15 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
       ...(callApiOptions?.includeLogProbs ? { logprobs: callApiOptions.includeLogProbs } : {}),
       ...(this.config.stop ? { stop: this.config.stop } : {}),
       ...(this.config.passthrough || {}),
-      ...(this.config.stream
-        ? {
-            stream_options: {
-              include_usage: true,
-            },
-          }
-        : {}),
     };
     logger.debug(`Calling OpenAI API: ${JSON.stringify(body)}`);
 
-    if (this.config.stream) {
-      interface StreamMetrics {
-        avgLatencyMs: string;
-        avgTokens: string;
-        timeToFirstToken: string;
-      }
-
-      const cached = false;
-      let totalAnswer = '';
-      let totalResponse = '';
-      let firstTokenTime = 0;
-      let firstTokenReceived = false;
-      let tokenEventsCount = 0;
-      let streamStartTime: number | undefined;
-      let completion_tokens = 0;
-      let prompt_tokens = 0;
-      let total_tokens = 0;
-
-      try {
-        streamStartTime = Date.now();
-        const responseStream = await fetch(`${this.getApiUrl()}/chat/completions`, {
+    let data,
+      cached = false;
+    try {
+      ({ data, cached } = (await fetchWithCache(
+        `${this.getApiUrl()}/chat/completions`,
+        {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -549,121 +525,14 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
             ...this.config.headers,
           },
           body: JSON.stringify(body),
-        });
-
-        const reader = responseStream.body?.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let buffer = '';
-
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const readResult = await reader?.read();
-          if (!readResult) {
-            break;
-          }
-          const { done, value } = readResult;
-          if (done) {
-            break;
-          }
-          const chunk = decoder.decode(value, { stream: true });
-          buffer += chunk;
-
-          if (!firstTokenReceived && buffer.trim().length > 0) {
-            firstTokenTime = Date.now();
-            firstTokenReceived = true;
-          }
-
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.trim() === 'data: [DONE]') {
-              continue;
-            }
-
-            const jsonLine = line.startsWith('data: ') ? line.slice(6) : line;
-            if (jsonLine.trim()) {
-              const json = JSON.parse(jsonLine);
-              json.timestamp = Date.now();
-              const answer = json.choices[0]?.delta?.content;
-
-              if (answer) {
-                totalAnswer += answer;
-              }
-
-              if (json.choices.length === 0) {
-                total_tokens = json.usage.total_tokens;
-                prompt_tokens = json.usage.prompt_tokens;
-                completion_tokens = json.usage.completion_tokens;
-              }
-
-              tokenEventsCount++;
-              totalResponse += JSON.stringify(json);
-            }
-          }
-        }
-      } catch (err) {
-        return {
-          error: `API call error: ${String(err)}`,
-        };
-      }
-
-      const streamEndTime = Date.now();
-      const totalsteamlatencyMs = streamEndTime - streamStartTime;
-      const avgalatencyMs = totalsteamlatencyMs / tokenEventsCount;
-      const avgTokens = total_tokens / tokenEventsCount;
-
-      let timeToFirstToken = 0;
-      if (streamStartTime) {
-        timeToFirstToken = (firstTokenTime - streamStartTime) / 1000;
-      }
-
-      const streamMetrics: StreamMetrics = {
-        avgLatencyMs: avgalatencyMs.toFixed(3),
-        avgTokens: avgTokens.toFixed(3),
-        timeToFirstToken: timeToFirstToken.toFixed(3),
+        },
+        REQUEST_TIMEOUT_MS,
+      )) as unknown as { data: any; cached: boolean });
+    } catch (err) {
+      return {
+        error: `API call error: ${String(err)}`,
       };
-
-      try {
-        const calling_jaon = body;
-        const response_json = totalResponse;
-        const output = totalAnswer;
-        return {
-          output,
-          tokenUsage: { total: total_tokens, prompt: prompt_tokens, completion: completion_tokens },
-          cached,
-          calling_jaon,
-          response_json,
-          streamMetrics,
-        };
-      } catch (err) {
-        return {
-          error: `API error: ${String(err)}}`,
-        };
-      }
-    } else {
-      let data,
-        cached = false;
-      try {
-        ({ data, cached } = (await fetchWithCache(
-          `${this.getApiUrl()}/chat/completions`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.getApiKey()}`,
-              ...(this.getOrganization() ? { 'OpenAI-Organization': this.getOrganization() } : {}),
-              ...this.config.headers,
-            },
-            body: JSON.stringify(body),
-          },
-          REQUEST_TIMEOUT_MS,
-        )) as unknown as { data: any; cached: boolean });
-      } catch (err) {
-        return {
-          error: `API call error: ${String(err)}`,
-        };
-      }
+    }
 
     logger.debug(`\tOpenAI chat completions API response: ${JSON.stringify(data)}`);
     if (data.error) {
@@ -672,8 +541,6 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
       };
     }
     try {
-      const calling_jaon = body;
-      const response_json = data;
       const message = data.choices[0].message;
       let output = '';
       if (message.content && (message.function_call || message.tool_calls)) {
@@ -687,50 +554,55 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
         (logProbObj: { token: string; logprob: number }) => logProbObj.logprob,
       );
 
-        // Handle function tool callbacks
-        const functionCalls = message.function_call ? [message.function_call] : message.tool_calls;
-        if (functionCalls && this.config.functionToolCallbacks) {
-          for (const functionCall of functionCalls) {
-            const functionName = functionCall.name;
-            if (this.config.functionToolCallbacks[functionName]) {
+      // Handle function tool callbacks
+      const functionCalls = message.function_call ? [message.function_call] : message.tool_calls;
+      if (functionCalls && this.config.functionToolCallbacks) {
+        const results = [];
+        for (const functionCall of functionCalls) {
+          const functionName = functionCall.name || functionCall.function?.name;
+          if (this.config.functionToolCallbacks[functionName]) {
+            try {
               const functionResult = await this.config.functionToolCallbacks[functionName](
-                message.function_call.arguments,
+                functionCall.arguments || functionCall.function?.arguments,
               );
-              return {
-                output: functionResult,
-                tokenUsage: getTokenUsage(data, cached),
-                cached,
-                logProbs,
-                cost: calculateCost(
-                  this.modelName,
-                  this.config,
-                  data.usage?.prompt_tokens,
-                  data.usage?.completion_tokens,
-                ),
-              };
+              results.push(functionResult);
+            } catch (error) {
+              logger.error(`Error executing function ${functionName}: ${error}`);
             }
           }
         }
-
-        return {
-          output,
-          tokenUsage: getTokenUsage(data, cached),
-          cached,
-          logProbs,
-          cost: calculateCost(
-            this.modelName,
-            this.config,
-            data.usage?.prompt_tokens,
-            data.usage?.completion_tokens,
-          ),
-          calling_jaon,
-          response_json,
-        };
-      } catch (err) {
-        return {
-          error: `API error: ${String(err)}: ${JSON.stringify(data)}`,
-        };
+        if (results.length > 0) {
+          return {
+            output: results.join('\n'),
+            tokenUsage: getTokenUsage(data, cached),
+            cached,
+            logProbs,
+            cost: calculateCost(
+              this.modelName,
+              this.config,
+              data.usage?.prompt_tokens,
+              data.usage?.completion_tokens,
+            ),
+          };
+        }
       }
+
+      return {
+        output,
+        tokenUsage: getTokenUsage(data, cached),
+        cached,
+        logProbs,
+        cost: calculateCost(
+          this.modelName,
+          this.config,
+          data.usage?.prompt_tokens,
+          data.usage?.completion_tokens,
+        ),
+      };
+    } catch (err) {
+      return {
+        error: `API error: ${String(err)}: ${JSON.stringify(data)}`,
+      };
     }
   }
 }
