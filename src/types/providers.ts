@@ -116,8 +116,6 @@ export type EnvOverrides = {
   AZURE_OPENAI_BASE_URL?: string;
   BAM_API_HOST?: string;
   BAM_API_KEY?: string;
-  CLOUDFLARE_ACCOUNT_ID?: string;
-  CLOUDFLARE_API_KEY?: string;
   COHERE_API_KEY?: string;
   GOOGLE_API_HOST?: string;
   GOOGLE_API_KEY?: string;
@@ -125,7 +123,6 @@ export type EnvOverrides = {
   LOCALAI_BASE_URL?: string;
   MISTRAL_API_BASE_URL?: string;
   MISTRAL_API_HOST?: string;
-  MISTRAL_API_KEY?: string;
   OPENAI_API_BASE_URL?: string;
   OPENAI_API_HOST?: string;
   OPENAI_API_KEY?: string;

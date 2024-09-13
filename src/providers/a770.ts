@@ -296,7 +296,7 @@ export class A770ChatCompletionProvider extends A770GenericProvider {
 
     const body = {
       model: this.modelName,
-      messages: messages,
+      messages,
       seed: this.config.seed || 0,
       max_tokens: this.config.max_tokens ?? Number.parseInt(process.env.A770_MAX_TOKENS || '1024'),
       temperature:

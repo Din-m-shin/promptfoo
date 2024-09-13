@@ -537,31 +537,9 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
           body: JSON.stringify(body),
         });
 
-//<<<<<<< HEAD
         const reader = responseStream.body?.getReader();
         const decoder = new TextDecoder('utf-8');
         let buffer = '';
-//=======
-    logger.debug(`\tOpenAI chat completions API response: ${JSON.stringify(data)}`);
-    if (data.error) {
-      return {
-        error: formatOpenAiError(data),
-      };
-    }
-    try {
-      const message = data.choices[0].message;
-      let output = '';
-      if (message.content && (message.function_call || message.tool_calls)) {
-        output = message;
-      } else if (message.content === null) {
-        output = message.function_call || message.tool_calls;
-      } else {
-        output = message.content;
-      }
-      const logProbs = data.choices[0].logprobs?.content?.map(
-        (logProbObj: { token: string; logprob: number }) => logProbObj.logprob,
-      );
-//>>>>>>> dd705383 (fix: restore openai comments)
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
@@ -673,27 +651,27 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
         };
       }
 
-      //logger.debug(`\tOpenAI chat completions API response: ${JSON.stringify(data)}`);
-      if (data.error) {
-        return {
-          error: formatOpenAiError(data),
-        };
+    logger.debug(`\tOpenAI chat completions API response: ${JSON.stringify(data)}`);
+    if (data.error) {
+      return {
+        error: formatOpenAiError(data),
+      };
+    }
+    try {
+      const calling_jaon = body;
+      const response_json = data;
+      const message = data.choices[0].message;
+      let output = '';
+      if (message.content && (message.function_call || message.tool_calls)) {
+        output = message;
+      } else if (message.content === null) {
+        output = message.function_call || message.tool_calls;
+      } else {
+        output = message.content;
       }
-      try {
-        const calling_jaon = body;
-        const response_json = data;
-        const message = data.choices[0].message;
-        let output = '';
-        if (message.content && (message.function_call || message.tool_calls)) {
-          output = message;
-        } else if (message.content === null) {
-          output = message.function_call || message.tool_calls;
-        } else {
-          output = message.content;
-        }
-        const logProbs = data.choices[0].logprobs?.content?.map(
-          (logProbObj: { token: string; logprob: number }) => logProbObj.logprob,
-        );
+      const logProbs = data.choices[0].logprobs?.content?.map(
+        (logProbObj: { token: string; logprob: number }) => logProbObj.logprob,
+      );
 
         // Handle function tool callbacks
         const functionCalls = message.function_call ? [message.function_call] : message.tool_calls;

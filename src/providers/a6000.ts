@@ -291,7 +291,7 @@ export class A6000ChatCompletionProvider extends A6000GenericProvider {
 
     const body = {
       model: this.modelName,
-      messages: messages,
+      messages,
       seed: this.config.seed || 0,
       max_tokens: this.config.max_tokens ?? Number.parseInt(process.env.A6000_MAX_TOKENS || '1024'),
       temperature:

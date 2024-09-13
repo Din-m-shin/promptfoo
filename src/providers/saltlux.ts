@@ -210,7 +210,7 @@ export class SaltluxChatCompletionProvider extends SaltluxGenericProvider {
 
     const body = {
       model: this.modelName,
-      messages: messages,
+      messages,
       seed: this.config.seed || 0,
       stream: false,
       max_tokens:
