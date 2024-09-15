@@ -91,6 +91,10 @@ export function startServer(
     socket.emit('init', await getLatestEval(filterDescription));
   });
 
+  app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK' });
+  });
+
   app.get('/api/results', (req, res) => {
     const datasetId = req.query.datasetId as string | undefined;
     const previousResults = listPreviousResults(
