@@ -503,6 +503,7 @@ function ResultsTable({
                     Object.keys(prompt.metrics.namedScores).length > 0 ? (
                       <CustomMetrics
                         lookup={prompt.metrics.namedScores}
+                        counts={prompt.metrics.namedScoresCount}
                         metricTotals={metricTotals}
                         onSearchTextChange={onSearchTextChange}
                       />
