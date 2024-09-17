@@ -157,6 +157,14 @@ export const CompletedPromptSchema = PromptSchema.extend({
       tokenUsage: TokenUsageSchema,
       namedScores: z.record(z.string(), z.number()),
       namedScoresCount: z.record(z.string(), z.number()),
+      redteam: z
+        .object({
+          pluginScores: z.record(z.string(), z.number()),
+          pluginScoresCount: z.record(z.string(), z.number()),
+          strategyScores: z.record(z.string(), z.number()),
+          strategyScoresCount: z.record(z.string(), z.number()),
+        })
+        .optional(),
       cost: z.number(),
       totalTimeToFirstToken: z.number(),
     })
@@ -267,6 +275,13 @@ export interface GradingResult {
 
   // User comment
   comment?: string;
+
+  // Additional info
+  metadata?: {
+    pluginId?: string;
+    strategyId?: string;
+    [key: string]: any;
+  };
 }
 
 export function isGradingResult(result: any): result is GradingResult {
