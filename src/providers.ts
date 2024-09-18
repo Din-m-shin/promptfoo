@@ -65,6 +65,7 @@ import { UpstageChatCompletionProvider } from './providers/upstage';
 import { VertexChatProvider, VertexEmbeddingProvider } from './providers/vertex';
 import { VoyageEmbeddingProvider } from './providers/voyage';
 import { WebhookProvider } from './providers/webhook';
+import { WebSocketProvider } from './providers/websocket';
 import RedteamCrescendoProvider from './redteam/providers/crescendo';
 import RedteamIterativeProvider from './redteam/providers/iterative';
 import RedteamImageIterativeProvider from './redteam/providers/iterativeImage';
@@ -381,6 +382,8 @@ export async function loadApiProvider(
     }
   } else if (providerPath.startsWith('http:') || providerPath.startsWith('https:')) {
     ret = new HttpProvider(providerPath, providerOptions);
+  } else if (providerPath.startsWith('ws:') || providerPath.startsWith('wss:')) {
+    ret = new WebSocketProvider(providerPath, providerOptions);
   } else if (providerPath === 'promptfoo:redteam:iterative') {
     ret = new RedteamIterativeProvider(providerOptions.config);
   } else if (providerPath === 'promptfoo:redteam:iterative:tree') {
