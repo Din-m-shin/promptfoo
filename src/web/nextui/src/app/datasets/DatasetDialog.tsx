@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import type { TestCasesWithMetadata } from '@/../../../types';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -12,7 +13,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextareaAutosize from '@mui/material/TextareaAutosize';
 import Typography from '@mui/material/Typography';
-import type { TestCasesWithMetadata } from '@promptfoo/types';
 import yaml from 'js-yaml';
 import Link from 'next/link';
 

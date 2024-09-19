@@ -1,4 +1,4 @@
-import { IS_RUNNING_LOCALLY } from '@app/constants';
+import { IS_RUNNING_LOCALLY } from '@/constants';
 import { redirect } from 'next/navigation';
 import './Home.css';
 

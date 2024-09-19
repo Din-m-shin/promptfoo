@@ -11,8 +11,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@app': path.resolve(__dirname, './src'),
-      '@promptfoo': path.resolve(__dirname, '../../'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
 });

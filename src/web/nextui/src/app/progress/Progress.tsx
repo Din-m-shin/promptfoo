@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { callApi } from '@app/api';
+import type { StandaloneEval } from '@/../../../util';
+import { callApi } from '@/api';
 import DownloadIcon from '@mui/icons-material/Download';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
@@ -17,7 +18,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import TextField from '@mui/material/TextField';
-import type { StandaloneEval } from '@promptfoo/util';
 import Link from 'next/link';
 
 export default function Cols() {

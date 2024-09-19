@@ -6,7 +6,7 @@ import type {
   TestCase,
   UnifiedConfig,
   Scenario,
-} from '@promptfoo/types';
+} from '@/../../../types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

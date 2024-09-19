@@ -1,4 +1,5 @@
 import React from 'react';
+import type { PromptWithMetadata } from '@/../../../types';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -11,7 +12,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextareaAutosize from '@mui/material/TextareaAutosize';
 import Typography from '@mui/material/Typography';
-import type { PromptWithMetadata } from '@promptfoo/types';
 import Link from 'next/link';
 
 interface PromptDialogProps {
