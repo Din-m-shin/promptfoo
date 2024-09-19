@@ -92,14 +92,6 @@ jest.mock('../src/database', () => ({
 }));
 jest.mock('../src/logger');
 
-const defaultMockResponse = {
-  status: 200,
-  statusText: 'OK',
-  headers: {
-    get: jest.fn().mockReturnValue(null),
-  },
-};
-
 describe('call provider apis', () => {
   afterEach(async () => {
     jest.clearAllMocks();
@@ -108,7 +100,6 @@ describe('call provider apis', () => {
 
   it('OpenAiCompletionProvider callApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           choices: [{ text: 'Test output' }],
@@ -128,7 +119,6 @@ describe('call provider apis', () => {
 
   it('OpenAiChatCompletionProvider callApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           choices: [{ message: { content: 'Test output' } }],
@@ -151,7 +141,6 @@ describe('call provider apis', () => {
 
   it('OpenAiChatCompletionProvider callApi with caching', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           choices: [{ message: { content: 'Test output 2' } }],
@@ -182,7 +171,6 @@ describe('call provider apis', () => {
 
   it('OpenAiChatCompletionProvider callApi with cache disabled', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           choices: [{ message: { content: 'Test output' } }],
@@ -236,7 +224,6 @@ describe('call provider apis', () => {
 
   it('AzureOpenAiCompletionProvider callApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           choices: [{ text: 'Test output' }],
@@ -256,7 +243,6 @@ describe('call provider apis', () => {
 
   it('AzureOpenAiChatCompletionProvider callApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           choices: [{ message: { content: 'Test output' } }],
@@ -287,7 +273,6 @@ describe('call provider apis', () => {
       },
     ];
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           choices: [
@@ -320,7 +305,6 @@ describe('call provider apis', () => {
     disableCache();
 
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           choices: [{ message: { content: 'Test output' } }],
@@ -344,7 +328,6 @@ describe('call provider apis', () => {
 
   it('LlamaProvider callApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           content: 'Test output',
@@ -362,7 +345,6 @@ describe('call provider apis', () => {
 
   it('OllamaCompletionProvider callApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn()
         .mockResolvedValue(`{"model":"llama2:13b","created_at":"2023-08-08T21:50:34.898068Z","response":"Gre","done":false}
 {"model":"llama2:13b","created_at":"2023-08-08T21:50:34.929199Z","response":"at","done":false}
@@ -385,7 +367,6 @@ describe('call provider apis', () => {
 
   it('OllamaChatProvider callApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn()
         .mockResolvedValue(`{"model":"orca-mini","created_at":"2023-12-16T01:46:19.263682972Z","message":{"role":"assistant","content":" Because","images":null},"done":false}
 {"model":"orca-mini","created_at":"2023-12-16T01:46:19.275143974Z","message":{"role":"assistant","content":" of","images":null},"done":false}
@@ -406,7 +387,6 @@ describe('call provider apis', () => {
 
   it('WebhookProvider callApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(
         JSON.stringify({
           output: 'Test output',
@@ -428,7 +408,6 @@ describe('call provider apis', () => {
   ])('HuggingfaceTextGenerationProvider callApi with %s', (format, mockedData) => {
     it('returns expected output', async () => {
       const mockResponse = {
-        ...defaultMockResponse,
         text: jest.fn().mockResolvedValue(JSON.stringify(mockedData)),
       };
       jest.mocked(fetch).mockResolvedValue(mockResponse as never);
@@ -443,7 +422,6 @@ describe('call provider apis', () => {
 
   it('HuggingfaceFeatureExtractionProvider callEmbeddingApi', async () => {
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(JSON.stringify([0.1, 0.2, 0.3, 0.4, 0.5])),
     };
     jest.mocked(fetch).mockResolvedValue(mockResponse as never);
@@ -469,7 +447,6 @@ describe('call provider apis', () => {
       ],
     ];
     const mockResponse = {
-      ...defaultMockResponse,
       text: jest.fn().mockResolvedValue(JSON.stringify(mockClassification)),
     };
     jest.mocked(fetch).mockResolvedValue(mockResponse as never);
@@ -522,7 +499,6 @@ describe('call provider apis', () => {
           },
         };
         const mockResponse = {
-          ...defaultMockResponse,
           text: jest.fn().mockResolvedValue(JSON.stringify(responsePayload)),
           ok: true,
         };
@@ -558,7 +534,6 @@ describe('call provider apis', () => {
             },
           };
           const mockResponse = {
-            ...defaultMockResponse,
             text: jest.fn().mockResolvedValue(JSON.stringify(responsePayload)),
             ok: true,
           };
@@ -591,7 +566,6 @@ describe('call provider apis', () => {
           messages: [],
         };
         const mockResponse = {
-          ...defaultMockResponse,
           text: jest.fn().mockResolvedValue(JSON.stringify(responsePayload)),
           ok: true,
         };
@@ -634,7 +608,6 @@ describe('call provider apis', () => {
           },
         };
         const mockResponse = {
-          ...defaultMockResponse,
           text: jest.fn().mockResolvedValue(JSON.stringify(responsePayload)),
           ok: true,
         };
@@ -679,7 +652,6 @@ describe('call provider apis', () => {
           },
         };
         const mockResponse = {
-          ...defaultMockResponse,
           text: jest.fn().mockResolvedValue(JSON.stringify(responsePayload)),
           ok: true,
         };
@@ -710,7 +682,6 @@ describe('call provider apis', () => {
         };
 
         const mockResponse = {
-          ...defaultMockResponse,
           text: jest.fn().mockResolvedValue(JSON.stringify(responsePayload)),
           ok: true,
         };
