@@ -1,12 +1,5 @@
 import { relations, sql } from 'drizzle-orm';
-import {
-  text,
-  integer,
-  sqliteTable,
-  primaryKey,
-  index,
-  uniqueIndex,
-} from 'drizzle-orm/sqlite-core';
+import { text, integer, sqliteTable, primaryKey, index } from 'drizzle-orm/sqlite-core';
 import type { EvaluateSummary, UnifiedConfig } from '../types';
 
 // ------------ Prompts ------------
@@ -31,12 +24,11 @@ export const tags = sqliteTable(
   'tags',
   {
     id: text('id').primaryKey(),
-    name: text('name').notNull(),
+    name: text('name').notNull().unique(),
     value: text('value').notNull(),
   },
   (table) => ({
     nameIdx: index('tags_name_idx').on(table.name),
-    uniqueNameValue: uniqueIndex('tags_name_value_unique').on(table.name, table.value),
   }),
 );
 
