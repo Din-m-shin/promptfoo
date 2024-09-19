@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import type { StandaloneEval } from '@/../../../util';
-import { callApi } from '@/api';
 import DownloadIcon from '@mui/icons-material/Download';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
@@ -33,7 +32,7 @@ export default function Cols() {
 
   useEffect(() => {
     (async () => {
-      const response = await callApi(`/progress`);
+      const response = await fetch(`/api/progress`);
       const data = await response.json();
       if (data && data.data) {
         setCols(data.data);

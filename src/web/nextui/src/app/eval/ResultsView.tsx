@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { callApi } from '@/api';
+import { REMOTE_API_BASE_URL, REMOTE_APP_BASE_URL } from '@/../../../constants';
+import { getApiBaseUrl } from '@/api';
 import { IS_RUNNING_LOCALLY } from '@/constants';
 import { useStore as useMainStore } from '@/state/evalConfig';
-import useShareConfig, { useShareAppBaseUrl } from '@/state/shareConfig';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -122,8 +122,6 @@ export default function ResultsView({
 
   // State for anchor element
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const { apiShareBaseUrl } = useShareConfig();
-  const appShareBaseUrl = useShareAppBaseUrl();
 
   const currentEvalId = evalId || defaultEvalId || 'default';
 
@@ -142,7 +140,7 @@ export default function ResultsView({
     let shareUrl = '';
     try {
       if (IS_RUNNING_LOCALLY) {
-        const response = await fetch(`${apiShareBaseUrl}/api/eval`, {
+        const response = await fetch(`${REMOTE_API_BASE_URL}/api/eval`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -159,9 +157,9 @@ export default function ResultsView({
           }),
         });
         const { id } = await response.json();
-        shareUrl = `${appShareBaseUrl}/eval/${id}`;
+        shareUrl = `${REMOTE_APP_BASE_URL}/eval/${id}`;
       } else {
-        shareUrl = `${window.location.host}/eval/?evalId=${currentEvalId}`;
+        shareUrl = `${window.location.host}/eval/?evalId=${evalId}`;
       }
 
       setShareUrl(shareUrl);
@@ -176,7 +174,7 @@ export default function ResultsView({
   const handleComparisonEvalSelected = async (compareEvalId: string) => {
     setAnchorEl(null);
     try {
-      const response = await callApi(`/results/${compareEvalId}`, {
+      const response = await fetch(`${await getApiBaseUrl()}/api/results/${compareEvalId}`, {
         cache: 'no-store',
       });
       const body = await response.json();
@@ -304,7 +302,7 @@ export default function ResultsView({
     if (newDescription !== null && newDescription !== config.description) {
       const newConfig = { ...config, description: newDescription };
       try {
-        const response = await callApi(`/api/eval/${evalId}`, {
+        const response = await fetch(`${await getApiBaseUrl()}/api/eval/${evalId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -324,7 +322,7 @@ export default function ResultsView({
   const handleDeleteEvalClick = async () => {
     if (window.confirm('Are you sure you want to delete this evaluation?')) {
       try {
-        const response = await callApi(`/eval/${evalId}`, {
+        const response = await fetch(`${await getApiBaseUrl()}/api/eval/${evalId}`, {
           method: 'DELETE',
         });
         if (!response.ok) {

@@ -1,9 +1,10 @@
 import readline from 'readline';
+import { REMOTE_API_BASE_URL } from './constants';
 import { fetchWithProxy } from './fetch';
 import logger from './logger';
 
 export async function sendFeedback(feedback: string) {
-  const resp = await fetchWithProxy('https://api.promptfoo.dev/api/feedback', {
+  const resp = await fetchWithProxy(`${REMOTE_API_BASE_URL}/api/feedback`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
