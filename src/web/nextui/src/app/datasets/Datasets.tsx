@@ -132,7 +132,7 @@ export default function Datasets() {
                 <TableRow
                   key={index}
                   hover
-                  onClick={() => handleClickOpen(index)}
+                  onClick={() => handleClickOpen((page - 1) * rowsPerPage + index)}
                   style={{ cursor: 'pointer' }}
                 >
                   <TableCell>{testCasesData.id.slice(0, 6)}</TableCell>
