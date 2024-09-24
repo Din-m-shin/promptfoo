@@ -1,5 +1,5 @@
 import React from 'react';
-import { callApi } from '@app/api';
+import { callApi } from '@app/utils/api';
 import {
   Dialog,
   DialogTitle,
