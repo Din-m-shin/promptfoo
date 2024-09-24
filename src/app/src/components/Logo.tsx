@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import logoPanda from '@app/assets/logo-panda.svg';
+import logoPanda from '@app/assets/logo_polarisoffice_full.svg';
 import Box from '@mui/material/Box';
 import './Logo.css';
 
