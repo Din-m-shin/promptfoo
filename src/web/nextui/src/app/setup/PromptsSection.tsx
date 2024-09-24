@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { callApi } from '@/api';
+import { callApi } from '@app/api';
 import { useStore } from '@app/state/evalConfig';
 import Copy from '@mui/icons-material/ContentCopy';
 import Delete from '@mui/icons-material/Delete';
