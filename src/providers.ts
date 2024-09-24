@@ -78,6 +78,7 @@ import type {
   ProviderOptions,
   ProviderOptionsMap,
 } from './types/providers';
+import { getNunjucksEngine } from './util/templates';
 
 // FIXME(ian): Make loadApiProvider handle all the different provider types (string, ProviderOptions, ApiProvider, etc), rather than the callers.
 export async function loadApiProvider(
@@ -98,6 +99,7 @@ export async function loadApiProvider(
     env,
   };
   let ret: ApiProvider;
+  providerPath = getNunjucksEngine().renderString(providerPath, {});
   if (
     providerPath.startsWith('file://') &&
     (providerPath.endsWith('.yaml') ||
