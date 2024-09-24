@@ -216,47 +216,67 @@ export function startServer(
   });
 
   const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination(req, file, cb) {
       const uploadDirectory = path.resolve(
         getConfigDirectoryPath(true /* createIfNotExists */),
         'upload_file',
       );
       cb(null, `${uploadDirectory}/`);
     },
-    filename: function (req, file, cb) {
+    filename(req, file, cb) {
       cb(null, file.originalname);
     },
   });
 
   const fileFilter = (req: any, file: any, cb: any) => {
-    // 허용된 파일 유형을 확인합니다.
-    if (file.mimetype === 'application/json') {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only JSON files are allowed.'), false);
+    const uploadDirectory = path.resolve(
+      getConfigDirectoryPath(true /* createIfNotExists */),
+      'upload_file',
+    );
+    const filePath = path.join(uploadDirectory, file.originalname);
+
+    if (file.mimetype !== 'application/json') {
+      return cb(new Error('Invalid file type. Only JSON files are allowed.'), false);
     }
+
+    if (fs.existsSync(filePath)) {
+      return cb(new Error('File already exists'), false);
+    }
+
+    cb(null, true);
   };
 
   const upload = multer({
-    storage: storage,
+    storage,
     limits: { fileSize: 1024 * 1024 * 10 }, // 파일 크기 제한 (10MB)
-    fileFilter: fileFilter,
+    fileFilter,
   });
 
-  app.post('/api/prompts', upload.single('files'), async (req, res) => {
-    const file = req.file;
-    if (!file) {
-      res.status(400).json({ error: 'No file uploaded or invalid file type' });
-      return;
-    }
+  app.post('/api/prompts', (req, res) => {
+    upload.single('files')(req, res, function (err) {
+      if (err) {
+        if (err.message === 'File already exists') {
+          return res.status(409).json({ error: 'File already exists' });
+        }
+        if (err.message === 'Invalid file type. Only JSON files are allowed.') {
+          return res.status(400).json({ error: err.message });
+        }
+        return res.status(500).json({ error: 'An error occurred during file upload' });
+      }
 
-    try {
-      const fileContent = fs.readFileSync(file.path, 'utf-8');
-      res.status(200).json({ data: fileContent });
-    } catch (error) {
-      console.error('Error reading file', error);
-      res.status(500).json({ error: 'Failed to read file' });
-    }
+      const file = req.file;
+      if (!file) {
+        return res.status(400).json({ error: 'No file uploaded or invalid file type' });
+      }
+
+      try {
+        const fileContent = fs.readFileSync(file.path, 'utf-8');
+        res.status(200).json({ data: fileContent });
+      } catch (error) {
+        console.error('Error reading file', error);
+        res.status(500).json({ error: 'Failed to read file' });
+      }
+    });
   });
 
   app.get('/api/prompts/uploadfile', async (req, res) => {

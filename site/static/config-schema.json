@@ -159,6 +159,75 @@
                             "VERTEX_PUBLISHER": {
                               "type": "string"
                             },
+                            "UPSTAGE_API_HOST": {
+                              "type": "string"
+                            },
+                            "UPSTAGE_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "UPSTAGE_BASE_URL": {
+                              "type": "string"
+                            },
+                            "UPSTAGE_API_KEY": {
+                              "type": "string"
+                            },
+                            "SALTLUX_API_HOST": {
+                              "type": "string"
+                            },
+                            "SALTLUX_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "SALTLUX_BASE_URL": {
+                              "type": "string"
+                            },
+                            "SALTLUX_API_KEY": {
+                              "type": "string"
+                            },
+                            "A6000_API_HOST": {
+                              "type": "string"
+                            },
+                            "A6000_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A6000_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A6000_MODEL_NAME": {
+                              "type": "string"
+                            },
+                            "A6000_API_KEY": {
+                              "type": "string"
+                            },
+                            "A770_API_HOST": {
+                              "type": "string"
+                            },
+                            "A770_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A770_BASE_URL": {
+                              "type": "string"
+                            },
+                            "A770_MODEL_NAME": {
+                              "type": "string"
+                            },
+                            "A770_API_KEY": {
+                              "type": "string"
+                            },
+                            "KONAN_API_HOST": {
+                              "type": "string"
+                            },
+                            "KONAN_API_BASE_URL": {
+                              "type": "string"
+                            },
+                            "KONAN_BASE_URL": {
+                              "type": "string"
+                            },
+                            "KONAN_MODEL_NAME": {
+                              "type": "string"
+                            },
+                            "KONAN_API_KEY": {
+                              "type": "string"
+                            },
                             "VERTEX_REGION": {
                               "type": "string"
                             }
