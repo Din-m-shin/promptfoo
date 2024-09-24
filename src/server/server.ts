@@ -4,6 +4,7 @@ import debounce from 'debounce';
 import express from 'express';
 import type { Stats } from 'fs';
 import fs from 'fs';
+import multer from 'multer';
 import http from 'node:http';
 import path from 'node:path';
 import readline from 'node:readline';
@@ -38,6 +39,7 @@ import {
   deleteEval,
   writeResultsToDatabase,
 } from '../util';
+import { getConfigDirectoryPath } from '../util/config';
 
 // Running jobs
 const evalJobs = new Map<string, Job>();
@@ -207,6 +209,85 @@ export function startServer(
       allPrompts = await getPrompts();
     }
     res.json({ data: allPrompts });
+  });
+
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      const uploadDirectory = path.resolve(
+        getConfigDirectoryPath(true /* createIfNotExists */),
+        'upload_file',
+      );
+      cb(null, `${uploadDirectory}/`);
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname);
+    },
+  });
+
+  const fileFilter = (req: any, file: any, cb: any) => {
+    // 허용된 파일 유형을 확인합니다.
+    if (file.mimetype === 'application/json') {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JSON files are allowed.'), false);
+    }
+  };
+
+  const upload = multer({
+    storage: storage,
+    limits: { fileSize: 1024 * 1024 * 10 }, // 파일 크기 제한 (10MB)
+    fileFilter: fileFilter,
+  });
+
+  app.post('/api/prompts', upload.single('files'), async (req, res) => {
+    const file = req.file;
+    if (!file) {
+      res.status(400).json({ error: 'No file uploaded or invalid file type' });
+      return;
+    }
+
+    try {
+      const fileContent = fs.readFileSync(file.path, 'utf-8');
+      res.status(200).json({ data: fileContent });
+    } catch (error) {
+      console.error('Error reading file', error);
+      res.status(500).json({ error: 'Failed to read file' });
+    }
+  });
+
+  app.get('/api/prompts/uploadfile', async (req, res) => {
+    const uploadDirectory = path.resolve(
+      getConfigDirectoryPath(true /* createIfNotExists */),
+      'upload_file',
+    );
+    try {
+      const files = fs
+        .readdirSync(uploadDirectory)
+        .filter((file) => file.endsWith('.json'))
+        .map((file) => path.join(uploadDirectory, file));
+      res.json({ status: 200, data: files });
+    } catch (error) {
+      console.error('Error listing JSON files', error);
+      res.json({ status: 500, error: 'Failed to list JSON files' });
+    }
+  });
+
+  app.post('/api/prompts/uploadfile', async (req, res) => {
+    const filePath = req.body.filePath;
+
+    if (!filePath || typeof filePath !== 'string') {
+      res.json({ status: 400, error: 'No file path provided' });
+      return;
+    }
+
+    const fileFullPath = path.resolve(getDirectory(), filePath);
+    try {
+      const fileContent = fs.readFileSync(fileFullPath, 'utf-8');
+      res.json({ status: 200, data: fileContent });
+    } catch (error) {
+      console.error('Error reading file', error);
+      res.json({ status: 500, error: 'Failed to read file' });
+    }
   });
 
   app.get('/api/progress', async (req, res) => {
