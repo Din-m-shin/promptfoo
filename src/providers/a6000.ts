@@ -217,7 +217,7 @@ export class A6000GenericProvider implements ApiProvider {
   }
 
   getApiUrlDefault(): string {
-    return 'http://192.168.17.95:18080/v1';
+    return 'http://192.168.17.95:1234/v1';
   }
 
   getApiUrl(): string {
