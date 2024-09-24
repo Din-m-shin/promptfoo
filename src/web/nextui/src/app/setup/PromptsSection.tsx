@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getApiBaseUrl } from '@/api';
+import { callApi } from '@/api';
 import { useStore } from '@/state/evalConfig';
 import Copy from '@mui/icons-material/ContentCopy';
 import Delete from '@mui/icons-material/Delete';
@@ -43,13 +43,12 @@ const PromptsSection: React.FC = () => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.type === 'application/json') {
-        const formdata = new FormData();
+        let formdata = new FormData();
 
         formdata.append('files', file);
 
         const requestOptions = { method: 'POST', body: formdata };
-        const apiBaseUrl = await getApiBaseUrl();
-        const response = await fetch(`${apiBaseUrl}/api/prompts`, requestOptions);
+        const response = await callApi(`/api/prompts`, requestOptions);
 
         if (response.ok) {
           const result = await response.json();
@@ -67,13 +66,12 @@ const PromptsSection: React.FC = () => {
           }
 
           if (result.data.errno === -2) {
-             alert('Upload failed due to an incorrect save path permission.');
+            alert('Upload failed due to an incorrect save path permission.');
             return;
           }
           if (result.data.path) {
             setPrompts([...prompts, result.data.path]);
           }
-          
         }
       }
 

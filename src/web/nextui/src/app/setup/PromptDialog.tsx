@@ -1,5 +1,5 @@
 import React from 'react';
-import { getApiBaseUrl } from '@/api';
+import { callApi } from '@/api';
 import {
   Dialog,
   DialogTitle,
@@ -30,7 +30,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
   const fetchJsonFiles = async () => {
     try {
       (async () => {
-        fetch(`${await getApiBaseUrl()}/api/prompts/uploadfile`)
+        callApi(`/prompts/uploadfile`)
           .then((response) => response.json())
           .then((data) => {
             setJsonFiles(data.data);
@@ -55,19 +55,21 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
   };
 
   const fetchFileContent = async (filePath: string) => {
-    const formdata = new FormData();
-    formdata.append('filePath', filePath);
-
-    const requestOptions = { method: 'POST', body: formdata };
-    const apiBaseUrl = await getApiBaseUrl();
-    const response = await fetch(`${apiBaseUrl}/api/prompts/uploadfile`, requestOptions);
+    const body = JSON.stringify({ filePath });
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    };
+    const response = await callApi(`/prompts/uploadfile`, requestOptions);
 
     if (response.ok) {
       const result = await response.json();
-
       const json_string = result.data;
-
       setFileContent(json_string);
+    } else {
+      const errorResult = await response.json();
+      console.error('Error fetching file content:', errorResult.error);
     }
   };
 
