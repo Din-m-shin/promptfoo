@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+import dedent from 'dedent';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import path from 'path';
@@ -79,6 +81,7 @@ import type {
   ProviderOptions,
   ProviderOptionsMap,
 } from './types/providers';
+import { isJavascriptFile } from './util';
 import { getNunjucksEngine } from './util/templates';
 
 // FIXME(ian): Make loadApiProvider handle all the different provider types (string, ProviderOptions, ApiProvider, etc), rather than the callers.
@@ -468,7 +471,7 @@ export async function loadApiProvider(
   } else if (providerPath.startsWith('golang:')) {
     const scriptPath = providerPath.split(':').slice(1).join(':');
     ret = new GolangProvider(scriptPath, providerOptions);
-  } else {
+  } else if (isJavascriptFile(providerPath)) {
     if (providerPath.startsWith('file://')) {
       providerPath = providerPath.slice('file://'.length);
     }
@@ -479,6 +482,16 @@ export async function loadApiProvider(
 
     const CustomApiProvider = await importModule(modulePath);
     ret = new CustomApiProvider(options);
+  } else {
+    logger.error(dedent`
+      Could not identify provider: ${chalk.bold(providerPath)}. 
+      
+      ${chalk.white(dedent`
+        Please check your configuration and ensure the provider is correctly specified.
+  
+        For more information on supported providers, visit: `)} ${chalk.cyan('https://promptfoo.dev/docs/providers/')}
+    `);
+    process.exit(1);
   }
   ret.transform = options.transform;
   ret.delay = options.delay;
