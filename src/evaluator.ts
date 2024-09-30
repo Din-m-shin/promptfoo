@@ -12,6 +12,7 @@ import { getEnvBool, getEnvInt, isCI } from './envars';
 import { renderPrompt, renderProvider, runExtensionHook } from './evaluatorHelpers';
 import logger from './logger';
 import { readPrompts, readProviderPromptMap } from './prompts';
+import { generateIdFromPrompt } from './models/prompt';
 import { maybeEmitAzureOpenAiWarning } from './providers/azureopenaiUtil';
 import { generatePrompts } from './suggestions';
 import telemetry from './telemetry';
@@ -29,7 +30,6 @@ import type {
   RunEvalOptions,
   TestSuite,
 } from './types';
-import { sha256 } from './util';
 import { transform, TransformInputType } from './util/transform';
 
 export const DEFAULT_MAX_CONCURRENCY = 4;
@@ -405,7 +405,7 @@ class Evaluator {
         }
         const completedPrompt = {
           ...prompt,
-          id: sha256(typeof prompt.raw === 'object' ? JSON.stringify(prompt.raw) : prompt.raw),
+          id: generateIdFromPrompt(prompt),
           provider: providerKey,
           label: prompt.label,
           metrics: {
