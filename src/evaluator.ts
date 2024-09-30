@@ -17,6 +17,7 @@ import { generatePrompts } from './suggestions';
 import telemetry from './telemetry';
 import type {
   ApiProvider,
+  Assertion,
   CompletedPrompt,
   EvaluateOptions,
   EvaluateResult,
@@ -24,13 +25,12 @@ import type {
   EvaluateSummary,
   EvaluateTable,
   Prompt,
+  ProviderResponse,
   RunEvalOptions,
   TestSuite,
-  ProviderResponse,
-  Assertion,
 } from './types';
 import { sha256 } from './util';
-import { transform } from './util/transform';
+import { transform, TransformInputType } from './util/transform';
 
 export const DEFAULT_MAX_CONCURRENCY = 4;
 
@@ -494,9 +494,28 @@ class Evaluator {
     // Prepare vars
     const varNames: Set<string> = new Set();
     const varsWithSpecialColsRemoved: Record<string, string | string[] | object>[] = [];
+    const inputTransformDefault = testSuite?.defaultTest?.options?.transformVars;
     for (const testCase of tests) {
       if (testCase.vars) {
         const varWithSpecialColsRemoved: Record<string, string | string[] | object> = {};
+        const inputTransformForIndividualTest = testCase.options?.transformVars;
+        const inputTransform = inputTransformForIndividualTest || inputTransformDefault;
+        if (inputTransform) {
+          const transformedVars = await transform(
+            inputTransform,
+            testCase.vars,
+            {
+              prompt: {},
+            },
+            true,
+            TransformInputType.VARS,
+          );
+          invariant(
+            typeof transformedVars === 'object',
+            'Transform function did not return a valid object',
+          );
+          testCase.vars = { ...testCase.vars, ...transformedVars };
+        }
         for (const varName of Object.keys(testCase.vars)) {
           varNames.add(varName);
           varWithSpecialColsRemoved[varName] = testCase.vars[varName];
