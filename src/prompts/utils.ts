@@ -1,5 +1,6 @@
 import type { Prompt } from '../types';
 import { getConfigDirectoryPath } from '../util/config/manage';
+import { sha256 } from '../util/createHash';
 import { VALID_FILE_EXTENSIONS } from './constants';
 
 /**
@@ -102,4 +103,10 @@ export function normalizeInput(
   }
   // numbers, booleans, etc
   throw new Error(`Invalid input prompt: ${JSON.stringify(promptPathOrGlobs)}`);
+}
+
+export function hashPrompt(prompt: Prompt): string {
+  return prompt.id || prompt.label
+    ? sha256(prompt.label)
+    : sha256(typeof prompt.raw === 'object' ? JSON.stringify(prompt.raw) : prompt.raw);
 }

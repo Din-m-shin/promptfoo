@@ -120,8 +120,8 @@ export interface RunEvalOptions {
   nunjucksFilters?: NunjucksFilterMap;
   evaluateOptions: EvaluateOptions;
 
-  rowIndex: number;
-  colIndex: number;
+  testIdx: number;
+  promptIdx: number;
   repeatIndex: number;
 }
 
@@ -190,15 +190,21 @@ export interface PromptWithMetadata {
 }
 
 export interface EvaluateResult {
+  id?: string; // on the new version 2, this is stored per-result
+  description?: string; // on the new version 2, this is stored per-result
+  promptIdx: number; // on the new version 2, this is stored per-result
+  testIdx: number; // on the new version 2, this is stored per-result
+  testCase: AtomicTestCase; // on the new version 2, this is stored per-result
+  promptId: string; // on the new version 2, this is stored per-result
   provider: Pick<ProviderOptions, 'id' | 'label'>;
   prompt: Prompt;
   vars: Record<string, string | object>;
   response?: ProviderResponse;
-  error?: string;
+  error?: string | null;
   success: boolean;
   score: number;
   latencyMs: number;
-  gradingResult?: GradingResult;
+  gradingResult?: GradingResult | null;
   namedScores: Record<string, number>;
   cost?: number;
   metadata?: Record<string, any>;
@@ -208,6 +214,7 @@ export interface EvaluateResult {
 }
 
 export interface EvaluateTableOutput {
+  id: string;
   pass: boolean;
   score: number;
   namedScores: Record<string, number>;
@@ -216,7 +223,7 @@ export interface EvaluateTableOutput {
   latencyMs: number;
   provider?: string;
   tokenUsage?: Partial<TokenUsage>;
-  gradingResult?: GradingResult;
+  gradingResult?: GradingResult | null;
   cost: number;
   metadata?: Record<string, any>;
   calling_jaon?: string;
@@ -245,7 +252,15 @@ export interface EvaluateStats {
   tokenUsage: Required<TokenUsage>;
 }
 
-export interface EvaluateSummary {
+export interface EvaluateSummaryV3 {
+  version: 3;
+  timestamp: string;
+  results: EvaluateResult[];
+  prompts: CompletedPrompt[];
+  stats: EvaluateStats;
+}
+
+export interface EvaluateSummaryV2 {
   version: number;
   timestamp: string;
   results: EvaluateResult[];
@@ -719,7 +734,7 @@ export interface EvalWithMetadata {
   id: string;
   date: Date;
   config: Partial<UnifiedConfig>;
-  results: EvaluateSummary;
+  results: EvaluateSummaryV3;
   description?: string;
 }
 
@@ -741,10 +756,10 @@ export interface SharedResults {
 export interface ResultsFile {
   version: number;
   createdAt: string;
-  results: EvaluateSummary;
+  results: EvaluateSummaryV3 | EvaluateSummaryV2;
   config: Partial<UnifiedConfig>;
   author: string | null;
-
+  prompts?: CompletedPrompt[];
   // Included by readResult() in util.
   datasetId?: string | null;
 }
@@ -763,7 +778,7 @@ export type ResultLightweightWithLabel = ResultLightweight & { label: string };
 // File exported as --output option
 export interface OutputFile {
   evalId: string | null;
-  results: EvaluateSummary;
+  results: EvaluateSummaryV3 | EvaluateSummaryV2;
   config: Partial<UnifiedConfig>;
   shareableUrl: string | null;
 }
@@ -773,7 +788,7 @@ export interface Job {
   status: 'in-progress' | 'complete';
   progress: number;
   total: number;
-  result: EvaluateSummary | null;
+  result: EvaluateSummaryV3 | EvaluateSummaryV2 | null;
 }
 
 // used for writing eval results
