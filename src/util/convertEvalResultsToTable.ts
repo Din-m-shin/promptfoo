@@ -14,6 +14,7 @@ export class PromptMetrics {
   assertPassCount: number;
   assertFailCount: number;
   totalLatencyMs: number;
+  totalTimeToFirstToken: number;
   tokenUsage: TokenUsage;
   namedScores: Record<string, number>;
   namedScoresCount: Record<string, number>;
@@ -26,6 +27,7 @@ export class PromptMetrics {
     this.assertPassCount = 0;
     this.assertFailCount = 0;
     this.totalLatencyMs = 0;
+    this.totalTimeToFirstToken = 0;
     this.tokenUsage = {
       total: 0,
       prompt: 0,

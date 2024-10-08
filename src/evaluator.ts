@@ -409,6 +409,7 @@ class Evaluator {
             assertPassCount: 0,
             assertFailCount: 0,
             totalLatencyMs: 0,
+            totalTimeToFirstToken: 0, // Added missing property
             tokenUsage: {
               total: 0,
               prompt: 0,
