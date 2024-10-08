@@ -40,7 +40,7 @@ import {
   deleteEval,
   writeResultsToDatabase,
 } from '../util';
-import { getConfigDirectoryPath } from '../util/config';
+import { getConfigDirectoryPath } from '../util/config/manage';
 
 // Running jobs
 const evalJobs = new Map<string, Job>();
