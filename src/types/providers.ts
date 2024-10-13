@@ -166,6 +166,8 @@ export type EnvOverrides = {
   KONAN_MODEL_NAME?: string;
   KONAN_API_KEY?: string;
   VERTEX_REGION?: string;
+  WATSONX_API_KEY?: string;
+  WATSONX_PROJECT_ID?: string;
 };
 
 export type FilePath = string;
