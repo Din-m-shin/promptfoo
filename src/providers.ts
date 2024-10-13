@@ -55,6 +55,7 @@ import {
   OpenAiImageProvider,
   OpenAiModerationProvider,
 } from './providers/openai';
+import { parsePackageProvider } from './providers/packageParser';
 import { PalmChatProvider } from './providers/palm';
 import { PortkeyChatCompletionProvider } from './providers/portkey';
 import { PythonProvider } from './providers/pythonCompletion';
@@ -482,6 +483,8 @@ export async function loadApiProvider(
       ? providerPath.slice('file://'.length)
       : providerPath.split(':').slice(1).join(':');
     ret = new GolangProvider(scriptPath, providerOptions);
+  } else if (providerPath.startsWith('package:')) {
+    ret = await parsePackageProvider(providerPath, basePath || process.cwd(), providerOptions);
   } else if (isJavascriptFile(providerPath)) {
     if (providerPath.startsWith('file://')) {
       providerPath = providerPath.slice('file://'.length);
