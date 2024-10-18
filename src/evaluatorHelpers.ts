@@ -123,6 +123,25 @@ export async function renderPrompt(
   // Resolve variable mappings
   resolveVariables(vars);
 
+  if (provider?.config) {
+    for (const [configKey, configValue] of Object.entries(provider.config)) {
+      if (
+        typeof configValue === 'string' &&
+        configValue.startsWith('{{') &&
+        configValue.endsWith('}}')
+      ) {
+        const varName = configValue.slice(2, -2).trim(); // Extract varName from '{{varName}}'
+        console.log('--- provider?.config varName : ', varName);
+        if (Object.prototype.hasOwnProperty.call(vars, varName)) {
+          provider.config[configKey] = Number(vars[varName]); // Replace with the corresponding value in vars
+          console.log(
+            `Replaced provider config ${configKey} with value from vars: ${vars[varName]}`,
+          );
+        }
+      }
+    }
+  }
+
   // Third party integrations
   if (prompt.raw.startsWith('portkey://')) {
     const { getPrompt } = await import('./integrations/portkey');
