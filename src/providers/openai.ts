@@ -431,6 +431,7 @@ export class OpenAiCompletionProvider extends OpenAiGenericProvider {
         REQUEST_TIMEOUT_MS,
       )) as unknown as any);
     } catch (err) {
+      logger.error(`API call error: ${String(err)}`);
       return {
         error: `API call error: ${String(err)}`,
       };
@@ -581,6 +582,15 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
           },
           body: JSON.stringify(body),
         });
+        },
+        REQUEST_TIMEOUT_MS,
+      )) as unknown as { data: any; cached: boolean });
+    } catch (err) {
+      logger.error(`API call error: ${String(err)}`);
+      return {
+        error: `API call error: ${String(err)}`,
+      };
+    }
 
         const reader = responseStream.body?.getReader();
         const decoder = new TextDecoder('utf-8');
@@ -1173,6 +1183,7 @@ export class OpenAiModerationProvider
         input: assistantResponse,
       });
     } catch (err) {
+      logger.error(`API call error: ${String(err)}`);
       return {
         error: `API call error: ${String(err)}`,
       };
