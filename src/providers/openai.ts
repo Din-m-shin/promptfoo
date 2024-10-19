@@ -573,6 +573,12 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
       try {
         streamStartTime = Date.now();
         const responseStream = await fetch(`${this.getApiUrl()}/chat/completions`, {
+    let data;
+    let cached = false;
+    try {
+      ({ data, cached } = (await fetchWithCache(
+        `${this.getApiUrl()}/chat/completions`,
+        {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -608,6 +614,34 @@ export class OpenAiChatCompletionProvider extends OpenAiGenericProvider {
           }
           const chunk = decoder.decode(value, { stream: true });
           buffer += chunk;
+    logger.debug(`\tOpenAI chat completions API response: ${JSON.stringify(data)}`);
+    if (data.error) {
+      return {
+        error: formatOpenAiError(data),
+      };
+    }
+    try {
+      const message = data.choices[0].message;
+      if (message.refusal) {
+        return {
+          error: `Model refused to generate a response: ${message.refusal}`,
+          tokenUsage: getTokenUsage(data, cached),
+        };
+      }
+      let output = '';
+      if (message.content && (message.function_call || message.tool_calls)) {
+        if (Array.isArray(message.tool_calls) && message.tool_calls.length === 0) {
+          output = message.content;
+        }
+        output = message;
+      } else if (message.content === null) {
+        output = message.function_call || message.tool_calls;
+      } else {
+        output = message.content;
+      }
+      const logProbs = data.choices[0].logprobs?.content?.map(
+        (logProbObj: { token: string; logprob: number }) => logProbObj.logprob,
+      );
 
           if (!firstTokenReceived && buffer.trim().length > 0) {
             firstTokenTime = Date.now();
