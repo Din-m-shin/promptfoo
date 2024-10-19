@@ -67,6 +67,7 @@ import {
 import { SaltluxChatCompletionProvider } from './providers/saltlux';
 import { ScriptCompletionProvider } from './providers/scriptCompletion';
 import { UpstageChatCompletionProvider } from './providers/upstage';
+import { createTogetherAiProvider } from './providers/togetherai';
 import { VertexChatProvider, VertexEmbeddingProvider } from './providers/vertex';
 import { VoyageEmbeddingProvider } from './providers/voyage';
 import { WatsonXProvider } from './providers/watsonx';
@@ -216,6 +217,11 @@ export async function loadApiProvider(
         apiBaseUrl: 'https://models.inference.ai.azure.com',
         apiKeyEnvar: 'GITHUB_TOKEN',
       },
+    });
+  } else if (providerPath.startsWith('togetherai:')) {
+    ret = createTogetherAiProvider(providerPath, {
+      config: providerOptions,
+      env: context.env,
     });
   } else if (providerPath.startsWith('portkey:')) {
     const splits = providerPath.split(':');
