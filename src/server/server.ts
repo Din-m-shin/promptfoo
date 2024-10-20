@@ -37,6 +37,7 @@ import { getConfigDirectoryPath } from '../util/config/manage';
 import { evalRouter } from './routes/eval';
 import { providersRouter } from './routes/providers';
 import { redteamRouter } from './routes/redteam';
+import { userRouter } from './routes/user';
 
 // Prompts cache
 let allPrompts: PromptWithMetadata[] | null = null;
@@ -245,6 +246,7 @@ export function createApp() {
   app.use('/api/eval', evalRouter);
   app.use('/api/providers', providersRouter);
   app.use('/api/redteam', redteamRouter);
+  app.use('/api/user', userRouter);
 
   app.post('/api/telemetry', async (req: Request, res: Response): Promise<void> => {
     try {
