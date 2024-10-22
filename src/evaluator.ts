@@ -9,7 +9,7 @@ import { runAssertions, runCompareAssertion } from './assertions';
 import { fetchWithCache, getCache } from './cache';
 import cliState from './cliState';
 import { getEnvBool, getEnvInt, isCI } from './envars';
-import { renderPrompt, runExtensionHook } from './evaluatorHelpers';
+import { renderPrompt, renderProvider, runExtensionHook } from './evaluatorHelpers';
 import logger from './logger';
 import { readPrompts, readProviderPromptMap } from './prompts';
 import { maybeEmitAzureOpenAiWarning } from './providers/azureopenaiUtil';
@@ -155,6 +155,10 @@ class Evaluator {
 
     // Render the prompt
     const renderedPrompt = await renderPrompt(prompt, vars, filters, provider);
+
+    const renderedProvider = await renderProvider(provider, vars);
+
+    provider = renderedProvider;
 
     let renderedJson = undefined;
     try {

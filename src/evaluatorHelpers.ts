@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import yaml from 'js-yaml';
+import _ from 'lodash';
 import * as path from 'path';
 import invariant from 'tiny-invariant';
 import cliState from './cliState';
@@ -42,6 +43,25 @@ export function resolveVariables(
   } while (!resolved && iterations < 5);
 
   return variables;
+}
+
+export async function renderProvider(
+  provider: ApiProvider,
+  vars: Record<string, string | object>,
+): Promise<ApiProvider> {
+  // 변수의 마지막 줄바꿈 제거
+  const providerCopy = _.cloneDeep(provider);
+
+  // 5. provider.config에 변수 적용
+  if (providerCopy.config) {
+    for (const [configKey] of Object.entries(providerCopy.config)) {
+      if (typeof vars[configKey] !== 'undefined') {
+        providerCopy.config[configKey] = Number(vars[configKey]);
+      }
+    }
+  }
+
+  return providerCopy;
 }
 
 export async function renderPrompt(
@@ -122,25 +142,6 @@ export async function renderPrompt(
 
   // Resolve variable mappings
   resolveVariables(vars);
-
-  if (provider?.config) {
-    for (const [configKey, configValue] of Object.entries(provider.config)) {
-      if (
-        typeof configValue === 'string' &&
-        configValue.startsWith('{{') &&
-        configValue.endsWith('}}')
-      ) {
-        const varName = configValue.slice(2, -2).trim(); // Extract varName from '{{varName}}'
-        console.log('--- provider?.config varName : ', varName);
-        if (Object.prototype.hasOwnProperty.call(vars, varName)) {
-          provider.config[configKey] = Number(vars[varName]); // Replace with the corresponding value in vars
-          console.log(
-            `Replaced provider config ${configKey} with value from vars: ${vars[varName]}`,
-          );
-        }
-      }
-    }
-  }
 
   // Third party integrations
   if (prompt.raw.startsWith('portkey://')) {
