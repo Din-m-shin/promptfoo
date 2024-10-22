@@ -50,32 +50,30 @@ const ProviderConfigDialog: React.FC<ProviderConfigDialogProps> = ({
             typeof value === 'string'
           ) {
             if (typeof value === 'number') {
-              handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                const inputValue = e.target.value;
-                const parsedValue = Number.parseFloat(inputValue);
-
-                if (Number.isNaN(parsedValue)) {
-                  setLocalConfig({ ...localConfig, [key]: inputValue });
-                } else {
-                  setLocalConfig({ ...localConfig, [key]: parsedValue });
-                }
-              };
-            } else if (typeof value === 'string') {
-              handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                const inputValue = e.target.value;
-                const parsedValue = Number.parseFloat(inputValue);
-
-                if (Number.isNaN(parsedValue)) {
-                  setLocalConfig({ ...localConfig, [key]: inputValue });
-                } else {
-                  setLocalConfig({ ...localConfig, [key]: parsedValue });
-                }
-              };
+              handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+                setLocalConfig({ ...localConfig, [key]: Number.parseFloat(e.target.value) });
             } else if (typeof value === 'boolean') {
               handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                 const firstChar = e.target.value.trim().toLowerCase()[0];
                 const boolValue = firstChar === 't' ? true : firstChar === 'f' ? false : value;
                 setLocalConfig({ ...localConfig, [key]: boolValue });
+              };
+            } else {
+              handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const trimmed = e.target.value.trim();
+                if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                  try {
+                    setLocalConfig({ ...localConfig, [key]: JSON.parse(trimmed) });
+                  } catch {
+                    setLocalConfig({ ...localConfig, [key]: trimmed });
+                  }
+                } else if (trimmed === 'null') {
+                  setLocalConfig({ ...localConfig, [key]: null });
+                } else if (trimmed === 'undefined') {
+                  setLocalConfig({ ...localConfig, [key]: undefined });
+                } else {
+                  setLocalConfig({ ...localConfig, [key]: trimmed });
+                }
               };
             }
 
