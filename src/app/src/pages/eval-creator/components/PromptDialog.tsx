@@ -12,9 +12,14 @@ import {
   Autocomplete,
 } from '@mui/material';
 
+interface PromptObject {
+  id: string;
+  label: string;
+}
+
 interface PromptDialogProps {
   open: boolean;
-  prompt: string;
+  prompt: string | PromptObject;
   index: number;
   onAdd: (prompt: string) => void;
   onCancel: () => void;
@@ -26,6 +31,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
   const [jsonFiles, setJsonFiles] = React.useState([]);
   const [selectedFile, setSelectedFile] = React.useState({ fullPath: '', fileName: '' });
   const [fileContent, setFileContent] = React.useState('');
+  const [label, setLabel] = React.useState('');
 
   const fetchJsonFiles = async () => {
     try {
@@ -79,14 +85,31 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
       setSelectedFile({ fullPath: '', fileName: '' });
       setEditingPrompt('');
       fetchFileContent('');
+      setLabel('');
     }
 
-    setEditingPrompt(prompt);
+    if (typeof prompt === 'object') {
+      setEditingPrompt(prompt.id);
+      setLabel(prompt.label);
+    } else if (typeof prompt === 'string') {
+      setEditingPrompt(prompt);
+    }
   }, [prompt, open]);
 
   const handleAdd = (close: boolean) => {
-    onAdd(editingPrompt);
+    if (editingPrompt && label) {
+      // Both editingPrompt and label are provided, create an object
+      const promptObject: PromptObject = {
+        id: editingPrompt as string,
+        label: label as string,
+      };
+      onAdd(promptObject as any);
+    } else {
+      // Only editingPrompt is provided, pass it as a string
+      onAdd(editingPrompt as string);
+    }
     setEditingPrompt('');
+    setLabel('');
     if (close) {
       onCancel();
     } else if (textFieldRef.current) {
@@ -145,6 +168,13 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
           )}
           fullWidth
         />
+        <TextField
+          label="Label"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
         {fileContent && (
           <>
             <Typography variant="subtitle1" style={{ marginBottom: '1rem', marginTop: '1rem' }}>
@@ -171,7 +201,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
           onClick={handleAdd.bind(null, true)}
           color="primary"
           variant="contained"
-          disabled={!editingPrompt.length}
+          disabled={typeof editingPrompt === 'string' && !editingPrompt.length}
         >
           Add
         </Button>
@@ -179,7 +209,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({ open, prompt, index, onAdd,
           onClick={handleAdd.bind(null, false)}
           color="primary"
           variant="contained"
-          disabled={!editingPrompt.length}
+          disabled={typeof editingPrompt === 'string' && !editingPrompt.length}
         >
           Add Another
         </Button>

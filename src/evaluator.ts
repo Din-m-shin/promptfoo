@@ -11,6 +11,7 @@ import cliState from './cliState';
 import { getEnvBool, getEnvInt, isCI } from './envars';
 import { renderPrompt, renderProvider, runExtensionHook } from './evaluatorHelpers';
 import logger from './logger';
+import { readPrompts, readProviderPromptMap } from './prompts';
 import { maybeEmitAzureOpenAiWarning } from './providers/azureopenaiUtil';
 import { generatePrompts } from './suggestions';
 import telemetry from './telemetry';
@@ -536,6 +537,21 @@ class Evaluator {
           : generateVarCombinations(testCase.vars || {});
 
       const numRepeat = this.options.repeat || 1;
+
+      const parsedPrompts = await readPrompts(testSuite.prompts);
+
+      if (!testSuite.providerPromptMap) {
+        testSuite.providerPromptMap = readProviderPromptMap(
+          {
+            providers: testSuite.providers.map((provider) => ({
+              id: provider.id(),
+              prompts: testSuite.prompts.map((prompt) => prompt.label),
+            })),
+          },
+          parsedPrompts,
+        );
+      }
+
       for (let repeatIndex = 0; repeatIndex < numRepeat; repeatIndex++) {
         for (const vars of varCombinations) {
           let colIndex = 0;

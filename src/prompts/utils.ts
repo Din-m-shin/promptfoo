@@ -1,4 +1,5 @@
 import type { Prompt } from '../types';
+import { getConfigDirectoryPath } from '../util/config';
 import { VALID_FILE_EXTENSIONS } from './constants';
 
 /**
@@ -48,6 +49,25 @@ export function normalizeInput(
     throw new Error(`Invalid input prompt: ${JSON.stringify(promptPathOrGlobs)}`);
   }
   if (typeof promptPathOrGlobs === 'string') {
+    try {
+      const parsedPrompt = JSON.parse(promptPathOrGlobs);
+      if (
+        parsedPrompt.id &&
+        parsedPrompt.id.includes(getConfigDirectoryPath()) &&
+        parsedPrompt.label
+      ) {
+        return [
+          {
+            raw: parsedPrompt.id,
+            id: parsedPrompt.id,
+            label: parsedPrompt.label || '',
+          },
+        ];
+      }
+    } catch (e) {
+      // If parsing fails, continue with the original string
+      console.warn('--- utils.ts normalizeInput e : ', e);
+    }
     return [
       {
         raw: promptPathOrGlobs,
