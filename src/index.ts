@@ -27,6 +27,7 @@ import {
   writeOutput,
   migrateResultsFromFileSystemToDatabase,
 } from './util';
+import { getConfigDirectoryPath } from './util/config';
 
 export * from './types';
 
@@ -55,6 +56,29 @@ async function evaluate(testSuite: EvaluateTestSuite, options: EvaluateOptions =
             };
           } else if (typeof promptInput === 'string') {
             return readPrompts(promptInput);
+          } else if (
+            typeof promptInput === 'string' ||
+            (typeof promptInput === 'object' &&
+              promptInput &&
+              typeof (promptInput as { id: string }).id === 'string')
+          ) {
+            if (
+              ((promptInput as { label: string }) && (promptInput as { id: string })).id.includes(
+                getConfigDirectoryPath(),
+              )
+            ) {
+              const readprompt = readPrompts(JSON.stringify(promptInput));
+              (await readprompt).map((prompt) => {
+                prompt.id = (promptInput as { id: string }).id;
+                prompt.label = (promptInput as { label: string }).label;
+              });
+              return readprompt;
+            } else {
+              return {
+                raw: (promptInput as { id: string }).id,
+                label: (promptInput as { label: string }).label,
+              };
+            }
           } else {
             return {
               raw: JSON.stringify(promptInput),
@@ -95,6 +119,26 @@ async function evaluate(testSuite: EvaluateTestSuite, options: EvaluateOptions =
   // Other settings
   if (options.cache === false || (options.repeat && options.repeat > 1)) {
     cache.disableCache();
+  }
+
+  if (!constructedTestSuite.providerPromptMap) {
+    constructedTestSuite.providerPromptMap = {};
+
+    if (Array.isArray(testSuite.providers)) {
+      for (const provider of testSuite.providers) {
+        // provider.id가 string인지 체크
+        if (
+          typeof provider === 'object' &&
+          typeof provider.id === 'string' &&
+          Array.isArray(provider.prompts)
+        ) {
+          if (!constructedTestSuite.providerPromptMap[provider.id]) {
+            constructedTestSuite.providerPromptMap[provider.id] = [];
+          }
+          constructedTestSuite.providerPromptMap[provider.id].push(...provider.prompts);
+        }
+      }
+    }
   }
 
   // Run the eval!

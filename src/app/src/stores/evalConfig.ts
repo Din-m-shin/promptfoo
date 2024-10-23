@@ -9,6 +9,7 @@ import type {
 } from '@promptfoo/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { getConfigDirectoryPath } from '../../../util/config';
 
 export interface State {
   env: EnvOverrides;
@@ -77,8 +78,14 @@ export const useStore = create<State>()(
             if (typeof config.prompts === 'object') {
               const updatedPrompts = config.prompts
                 .map((prompt) => {
-                  if (typeof prompt === 'object' && 'label' in prompt) {
-                    return { content: prompt.label };
+                  if (typeof prompt === 'object' && 'label' in prompt && 'id' in prompt) {
+                    if (prompt.id?.includes(getConfigDirectoryPath())) {
+                      return { content: { id: prompt.id, label: prompt.label } };
+                    } else {
+                      return { content: { id: prompt.raw, label: prompt.label } };
+                    }
+                  } else if (typeof prompt === 'object' && 'label' in prompt) {
+                    return { content: { id: prompt.raw, label: prompt.label } };
                   } else if (typeof prompt === 'string') {
                     return { content: prompt };
                   } else {
@@ -88,7 +95,8 @@ export const useStore = create<State>()(
                 })
                 .filter((prompt) => prompt !== null);
 
-              updates.prompts = updatedPrompts.map((prompt) => prompt.content || '');
+              updates.prompts = updatedPrompts.map((prompt) => prompt.content || '') as string[];
+              get().setPrompts(updates.prompts);
             }
           } else {
             console.warn('Invalid prompts config', config.prompts);

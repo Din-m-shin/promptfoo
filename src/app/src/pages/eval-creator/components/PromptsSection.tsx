@@ -154,9 +154,11 @@ const PromptsSection: React.FC = () => {
                   <TableCell>
                     <Typography variant="body2">
                       {`Prompt #${index + 1}: `}
-                      {(prompt.length > 250 ? prompt.slice(0, 250) + ' ...' : prompt)
-                        .split(/({{\w+}})/g)
-                        .map((part, i) =>
+                      {(typeof prompt === 'string' ? prompt : JSON.stringify(prompt)).slice(
+                        0,
+                        250,
+                      ) +
+                        (prompt.length > 250 ? ' ...' : '').split(/({{\w+}})/g).map((part, i) =>
                           /{{\s*(\w+)\s*}}/g.test(part) ? (
                             <span key={i} className="prompt-var-highlight">
                               {part}
