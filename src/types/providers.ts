@@ -89,6 +89,7 @@ export interface ProviderResponse {
   calling_jaon?: string | any;
   response_json?: string | any;
   streamMetrics?: any;
+  isRefusal?: boolean;
 }
 
 export interface ProviderEmbeddingResponse {
