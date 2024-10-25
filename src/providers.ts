@@ -9,6 +9,10 @@ import { importModule } from './esm';
 import logger from './logger';
 import { A770ChatCompletionProvider } from './providers/a770';
 import { A6000ChatCompletionProvider } from './providers/a6000';
+import {
+  AdalineGatewayChatProvider,
+  AdalineGatewayEmbeddingProvider,
+} from './providers/adaline.gateway';
 import { AI21ChatCompletionProvider } from './providers/ai21';
 import { AnthropicCompletionProvider, AnthropicMessagesProvider } from './providers/anthropic';
 import {
@@ -430,6 +434,22 @@ export async function loadApiProvider(
       ret = new LocalAiEmbeddingProvider(modelName, providerOptions);
     } else {
       ret = new LocalAiChatProvider(modelType, providerOptions);
+    }
+  } else if (providerPath.startsWith('adaline:')) {
+    const splits = providerPath.split(':');
+    if (splits.length < 4) {
+      throw new Error(
+        `Invalid adaline provider path: ${providerPath}. path format should be 'adaline:<provider_name>:<model_type>:<model_name>' eg. 'adaline:openai:chat:gpt-4o'`,
+      );
+    }
+    const providerName = splits[1];
+    const modelType = splits[2];
+    const modelName = splits[3];
+
+    if (modelType === 'embedding' || modelType === 'embeddings') {
+      ret = new AdalineGatewayEmbeddingProvider(providerName, modelName, providerOptions);
+    } else {
+      ret = new AdalineGatewayChatProvider(providerName, modelName, providerOptions);
     }
   } else if (
     providerPath.startsWith('http:') ||
