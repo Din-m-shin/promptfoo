@@ -256,7 +256,7 @@ interface ProviderSelectorProps {
 const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange }) => {
   const [selectedProvider, setSelectedProvider] = React.useState<ProviderOptions | null>(null);
 
-  const getProviderLabel = (provider: string | ProviderOptions): string => {
+  const getProviderLabel = (provider: ProviderOptions | string): string => {
     if (typeof provider === 'string') {
       return provider;
     }
@@ -284,14 +284,14 @@ const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange
     return provider.id || 'Unknown provider';
   };
 
-  const getProviderKey = (provider: string | ProviderOptions, index: number): string | number => {
+  const getProviderKey = (provider: ProviderOptions | string, index: number): number | string => {
     if (typeof provider === 'string') {
       return provider;
     }
     return provider.id || index;
   };
 
-  const handleProviderClick = (provider: string | ProviderOptions): void => {
+  const handleProviderClick = (provider: ProviderOptions | string): void => {
     if (typeof provider === 'string') {
       alert('Cannot edit custom providers');
     } else if (provider.config) {
@@ -319,7 +319,7 @@ const ProviderSelector: React.FC<ProviderSelectorProps> = ({ providers, onChange
         options={defaultProviders}
         value={providers}
         groupBy={(option) => getGroupName(option.id)}
-        onChange={(event, newValue: (string | ProviderOptions)[]) => {
+        onChange={(event, newValue: (ProviderOptions | string)[]) => {
           onChange(newValue.map((value) => (typeof value === 'string' ? { id: value } : value)));
         }}
         getOptionLabel={(option) => {
