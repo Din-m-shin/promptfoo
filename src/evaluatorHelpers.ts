@@ -15,8 +15,8 @@ import { getNunjucksEngine } from './util/templates';
 import { transform } from './util/transform';
 
 export function resolveVariables(
-  variables: Record<string, object | string>,
-): Record<string, object | string> {
+  variables: Record<string, string | object>,
+): Record<string, string | object> {
   let resolved = true;
   const regex = /\{\{\s*(\w+)\s*\}\}/; // Matches {{variableName}}, {{ variableName }}, etc.
 
@@ -67,7 +67,7 @@ export async function renderProvider(
 
 export async function renderPrompt(
   prompt: Prompt,
-  vars: Record<string, object | string>,
+  vars: Record<string, string | object>,
   nunjucksFilters?: NunjucksFilterMap,
   provider?: ApiProvider,
 ): Promise<string> {
@@ -118,7 +118,7 @@ export async function renderPrompt(
         vars[varName] = pythonScriptOutput.output.trim();
       } else if (fileExtension === 'yaml' || fileExtension === 'yml') {
         vars[varName] = JSON.stringify(
-          yaml.load(fs.readFileSync(filePath, 'utf8')) as object | string,
+          yaml.load(fs.readFileSync(filePath, 'utf8')) as string | object,
         );
       } else {
         vars[varName] = fs.readFileSync(filePath, 'utf8').trim();
