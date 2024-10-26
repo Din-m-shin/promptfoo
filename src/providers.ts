@@ -71,6 +71,7 @@ import {
 import { SaltluxChatCompletionProvider } from './providers/saltlux';
 import { ScriptCompletionProvider } from './providers/scriptCompletion';
 import { UpstageChatCompletionProvider } from './providers/upstage';
+import { SimulatedUser } from './providers/simulatedUser';
 import { createTogetherAiProvider } from './providers/togetherai';
 import { VertexChatProvider, VertexEmbeddingProvider } from './providers/vertex';
 import { VoyageEmbeddingProvider } from './providers/voyage';
@@ -511,6 +512,8 @@ export async function loadApiProvider(
     console.log('a770 modelName ', modelName);
 
     ret = new A770ChatCompletionProvider(modelName, providerOptions);
+  } else if (providerPath === 'promptfoo:simulated-user') {
+    ret = new SimulatedUser(providerOptions);
   } else if (providerPath.startsWith('groq:')) {
     const modelName = providerPath.split(':')[1];
     ret = new GroqProvider(modelName, providerOptions);
