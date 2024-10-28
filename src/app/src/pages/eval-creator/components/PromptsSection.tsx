@@ -61,8 +61,8 @@ const PromptsSection: React.FC = () => {
             console.error('Failed to upload file: ', result.error);
             return;
           }
-          if (result.data.path) {
-            setPrompts([...prompts, result.data.path]);
+          if (result.path) {
+            setPrompts([...prompts, result.path]);
           }
         }
       }
