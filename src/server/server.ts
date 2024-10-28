@@ -272,7 +272,7 @@ export function startServer(
 
       try {
         const fileContent = fs.readFileSync(file.path, 'utf-8');
-        res.status(200).json({ data: fileContent });
+        res.status(200).json({ data: fileContent, path: file.path });
       } catch (error) {
         console.error('Error reading file', error);
         res.status(500).json({ error: 'Failed to read file' });
