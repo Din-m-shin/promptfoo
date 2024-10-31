@@ -1,5 +1,5 @@
 import type { Prompt } from '../types';
-import { getConfigDirectoryPath } from '../util/config';
+import { getConfigDirectoryPath } from '../util/config/manage';
 import { VALID_FILE_EXTENSIONS } from './constants';
 
 /**
