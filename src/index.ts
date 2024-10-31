@@ -27,7 +27,7 @@ import {
   writeOutput,
   migrateResultsFromFileSystemToDatabase,
 } from './util';
-import { getConfigDirectoryPath } from './util/config';
+import { getConfigDirectoryPath } from './util/config/manage';
 
 export * from './types';
 

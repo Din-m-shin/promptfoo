@@ -9,7 +9,7 @@ import type {
 } from '@promptfoo/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getConfigDirectoryPath } from '../../../util/config';
+import { getConfigDirectoryPath } from '../../../util/config/manage';
 
 export interface State {
   env: EnvOverrides;
