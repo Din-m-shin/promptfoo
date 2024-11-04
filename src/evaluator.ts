@@ -11,10 +11,10 @@ import cliState from './cliState';
 import { getEnvBool, getEnvInt, isCI } from './envars';
 import { renderPrompt, renderProvider, runExtensionHook } from './evaluatorHelpers';
 import logger from './logger';
-import { readPrompts, readProviderPromptMap } from './prompts';
 import type Eval from './models/eval';
 import { generateIdFromPrompt } from './models/prompt';
 import Provider from './models/provider';
+import { readPrompts, readProviderPromptMap } from './prompts';
 import { maybeEmitAzureOpenAiWarning } from './providers/azureopenaiUtil';
 import { generatePrompts } from './suggestions';
 import telemetry from './telemetry';
@@ -665,40 +665,6 @@ class Evaluator {
       } catch (error) {
         logger.error(`Error saving result: ${error} ${JSON.stringify(row)}`);
       }
-
-      const { rowIndex, colIndex } = evalStep;
-      if (!table.body[rowIndex]) {
-        table.body[rowIndex] = {
-          description: evalStep.test.description,
-          outputs: [],
-          test: evalStep.test,
-          vars: table.head.vars
-            .map((varName) => {
-              const varValue = evalStep.test.vars?.[varName] || '';
-              if (typeof varValue === 'string') {
-                return varValue;
-              }
-              return JSON.stringify(varValue);
-            })
-            .flat(),
-        };
-      }
-      table.body[rowIndex].outputs[colIndex] = {
-        pass: row.success,
-        score: row.score,
-        namedScores: row.namedScores,
-        text: resultText,
-        prompt: row.prompt.raw,
-        provider: row.provider.label || row.provider.id,
-        latencyMs: row.latencyMs,
-        tokenUsage: row.response?.tokenUsage,
-        gradingResult: row.gradingResult,
-        cost: row.cost || 0,
-        metadata: row.metadata,
-        calling_jaon: row.calling_jaon,
-        response_json: row.response_json,
-        streamMetrics: row.streamMetrics,
-      };
 
       const { promptIdx } = row;
       const metrics = prompts[promptIdx].metrics;

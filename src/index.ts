@@ -23,15 +23,8 @@ import type {
   PromptFunction,
   Scenario,
 } from './types';
-import {
-  readFilters,
-  writeResultsToDatabase,
-  writeMultipleOutputs,
-  writeOutput,
-  migrateResultsFromFileSystemToDatabase,
-} from './util';
-import { getConfigDirectoryPath } from './util/config/manage';
 import { readFilters, writeMultipleOutputs, writeOutput } from './util';
+import { getConfigDirectoryPath } from './util/config/manage';
 import { PromptSchema } from './validators/prompts';
 
 export * from './types';

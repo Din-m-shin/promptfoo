@@ -18,6 +18,7 @@ export class PromptMetrics {
   namedScores: Record<string, number>;
   namedScoresCount: Record<string, number>;
   cost: number;
+  totalTimeToFirstToken: number;
 
   constructor() {
     this.score = 0;
@@ -35,6 +36,7 @@ export class PromptMetrics {
     this.namedScores = {};
     this.namedScoresCount = {};
     this.cost = 0;
+    this.totalTimeToFirstToken = 0;
   }
 }
 
