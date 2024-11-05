@@ -13,7 +13,6 @@ import { renderPrompt, renderProvider, runExtensionHook } from './evaluatorHelpe
 import logger from './logger';
 import type Eval from './models/eval';
 import { generateIdFromPrompt } from './models/prompt';
-import Provider from './models/provider';
 import { readPrompts, readProviderPromptMap } from './prompts';
 import { maybeEmitAzureOpenAiWarning } from './providers/azureopenaiUtil';
 import { generatePrompts } from './suggestions';
