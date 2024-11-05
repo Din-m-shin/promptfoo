@@ -254,48 +254,94 @@ function EvalOutputCell({
     );
   }
 
-  if (output.tokenUsage?.completion) {
-    const tokPerSec = output.tokenUsage.completion / (output.latencyMs / 1000);
-    tokPerSecDisplay = (
-      <span>{Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(tokPerSec)}</span>
-    );
-  }
+  if (output.response) {
+    if (output.response.tokenUsage?.completion) {
+      const tokPerSec = output.response.tokenUsage.completion / (output.latencyMs / 1000);
+      tokPerSecDisplay = (
+        <span>{Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(tokPerSec)}</span>
+      );
+    }
 
-  if (output.cost) {
-    costDisplay = <span>${output.cost.toPrecision(2)}</span>;
-  }
+    if (output.response.cost) {
+      costDisplay = <span>${output.cost.toPrecision(2)}</span>;
+    }
 
-  if (output.tokenUsage?.cached) {
-    tokenUsageDisplay = (
-      <span>
-        {Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
-          output.tokenUsage.cached,
-        )}{' '}
-        (cached)
-      </span>
-    );
-  } else if (output.tokenUsage?.total) {
-    const promptTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
-      output.tokenUsage.prompt ?? 0,
-    );
-    const completionTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
-      output.tokenUsage.completion ?? 0,
-    );
-    const totalTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
-      output.tokenUsage.total,
-    );
-
-    tokenUsageDisplay = (
-      <Tooltip
-        title={`${promptTokens} prompt tokens + ${completionTokens} completion tokens = ${totalTokens} total`}
-      >
+    if (output.response.tokenUsage?.cached) {
+      tokenUsageDisplay = (
         <span>
-          {totalTokens}
-          {(promptTokens !== '0' || completionTokens !== '0') &&
-            ` (${promptTokens}+${completionTokens})`}
+          {Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
+            output.response.tokenUsage.cached,
+          )}{' '}
+          (cached)
         </span>
-      </Tooltip>
-    );
+      );
+    } else if (output.response.tokenUsage?.total) {
+      const promptTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
+        output.response.tokenUsage.prompt ?? 0,
+      );
+      const completionTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
+        output.response.tokenUsage.completion ?? 0,
+      );
+      const totalTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
+        output.response.tokenUsage.total,
+      );
+
+      tokenUsageDisplay = (
+        <Tooltip
+          title={`${promptTokens} prompt tokens + ${completionTokens} completion tokens = ${totalTokens} total`}
+        >
+          <span>
+            {totalTokens}
+            {(promptTokens !== '0' || completionTokens !== '0') &&
+              ` (${promptTokens}+${completionTokens})`}
+          </span>
+        </Tooltip>
+      );
+    }
+  } else {
+    if (output.tokenUsage?.completion) {
+      const tokPerSec = output.tokenUsage.completion / (output.latencyMs / 1000);
+      tokPerSecDisplay = (
+        <span>{Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(tokPerSec)}</span>
+      );
+    }
+
+    if (output.cost) {
+      costDisplay = <span>${output.cost.toPrecision(2)}</span>;
+    }
+
+    if (output.tokenUsage?.cached) {
+      tokenUsageDisplay = (
+        <span>
+          {Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
+            output.tokenUsage.cached,
+          )}{' '}
+          (cached)
+        </span>
+      );
+    } else if (output.tokenUsage?.total) {
+      const promptTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
+        output.tokenUsage.prompt ?? 0,
+      );
+      const completionTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
+        output.tokenUsage.completion ?? 0,
+      );
+      const totalTokens = Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
+        output.tokenUsage.total,
+      );
+
+      tokenUsageDisplay = (
+        <Tooltip
+          title={`${promptTokens} prompt tokens + ${completionTokens} completion tokens = ${totalTokens} total`}
+        >
+          <span>
+            {totalTokens}
+            {(promptTokens !== '0' || completionTokens !== '0') &&
+              ` (${promptTokens}+${completionTokens})`}
+          </span>
+        </Tooltip>
+      );
+    }
   }
 
   const comment =
@@ -327,16 +373,27 @@ function EvalOutputCell({
           <strong>Cost:</strong> {costDisplay}
         </div>
       )}
-      {output.streamMetrics && (
+      {(output.response?.streamMetrics || output.streamMetrics) && (
         <>
           <div className="stat-item">
-            <strong>Avg Latency:</strong> {output.streamMetrics.avgLatencyMs} ms
+            <strong>Avg Latency:</strong>{' '}
+            {output.response
+              ? output.response.streamMetrics.avgLatencyMs
+              : output.streamMetrics.avgLatencyMs}{' '}
+            ms
           </div>
           <div className="stat-item">
-            <strong>Avg Tokens:</strong> {output.streamMetrics.avgTokens}
+            <strong>Avg Tokens:</strong>{' '}
+            {output.response
+              ? output.response.streamMetrics.avgTokens
+              : output.streamMetrics.avgTokens}
           </div>
           <div className="stat-item">
-            <strong>TTFT:</strong> {output.streamMetrics.timeToFirstToken} ms
+            <strong>TTFT:</strong>{' '}
+            {output.response
+              ? output.response.streamMetrics.timeToFirstToken
+              : output.streamMetrics.timeToFirstToken}{' '}
+            ms
           </div>
         </>
       )}
@@ -379,8 +436,8 @@ function EvalOutputCell({
             gradingResults={output.gradingResult?.componentResults}
             output={text}
             metadata={output.metadata}
-            calling_jaon={output.calling_jaon}
-            response_json={output.response_json}
+            calling_jaon={output.response ? output.response.calling_jaon : output.calling_jaon}
+            response_json={output.response ? output.response.response_json : output.response_json}
           />
         </>
       )}

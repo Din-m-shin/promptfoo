@@ -230,6 +230,7 @@ export interface EvaluateTableOutput {
   calling_jaon?: string;
   response_json?: string;
   streamMetrics?: any;
+  response: ProviderResponse;
 }
 
 export interface EvaluateTableRow {

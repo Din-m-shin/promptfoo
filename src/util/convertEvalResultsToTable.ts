@@ -108,6 +108,7 @@ export function convertResultsToTable(eval_: ResultsFile): EvaluateTable {
       provider: result.provider?.label || result.provider?.id || 'unknown provider',
       pass: result.success,
       cost: result.cost || 0,
+      response: result.response || {},
     };
     invariant(result.promptId, 'Prompt ID is required');
     if (!completedPrompts[result.promptIdx]) {
