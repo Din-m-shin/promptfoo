@@ -247,7 +247,12 @@ export default function EvalOutputPromptDialog({
               value={(() => {
                 try {
                   if (typeof response_json === 'string') {
-                    return JSON.stringify(JSON.parse(response_json), null, 2);
+                    try {
+                      return JSON.stringify(JSON.parse(response_json), null, 2);
+                    } catch (e) {
+                      console.error('Error parsing JSON', e);
+                      return JSON.stringify(response_json, null, 2);
+                    }
                   } else {
                     return JSON.stringify(response_json, null, 2);
                   }

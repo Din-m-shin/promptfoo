@@ -25,7 +25,7 @@ const LogoText = styled(Typography)(({ theme }) => ({
 }));
 
 const LogoIcon = styled('img')({
-  width: '25px',
+  width: '150px',
   height: 'auto',
 });
 
